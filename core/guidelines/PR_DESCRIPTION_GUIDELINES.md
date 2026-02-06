@@ -20,7 +20,7 @@ The description is split across two fields in the GitHub web form:
 
 - Short imperative sentence describing the change
 - Corresponds to the `#` heading in the draft file
-- Example: `Fix compilation service integration with run-execution`
+- Example: `Fix user authentication for SSO login`
 
 ### Body field
 
