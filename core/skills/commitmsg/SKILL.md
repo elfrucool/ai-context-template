@@ -4,6 +4,15 @@ Generate commit messages that cover the **full scope** of work across related se
 
 ## How It Works
 
+## Mode Requirements
+
+**For Windsurf Cascade Agent**:
+- If you are in Ask mode, stop and ask the user to switch to Code mode
+- This skill requires git commands and file operations that are only available in Code mode
+
+**For Claude CLI**:
+- No special indication is required, Claude CLI knows how to require the user to authorize commands and modifications
+
 ### Default Behavior (Smart Git-Based Scope Detection)
 
 1. **Find uncommitted changes**:
