@@ -211,3 +211,75 @@ echo "   1. Fill in guidelines/domain-explanation.md with your project's concept
 echo "   2. Review CLAUDE.md and adjust to your preferences"
 echo "   3. Start a session and let the AI read 0-index.md first"
 echo ""
+
+# ── AI Agent Guidance Prompt ───────────────────────────────────────────
+
+cat << 'EOF'
+
+══════════════════════════════════════════════════════════════
+ AI AGENT SETUP ASSISTANCE PROMPT
+══════════════════════════════════════════════════════════════
+
+Copy this prompt into your AI agent to help fill the templates:
+
+---
+
+## Project Analysis and Template Setup
+
+I need to analyze this project and fill in the ai-context templates. Please help me document:
+
+### 1. First, analyze the project structure:
+
+**Key files to examine (prioritized):**
+- `README.md` - Project overview and purpose
+- `package.json`, `pom.xml`, `build.gradle`, `Cargo.toml`, etc. - Dependencies and tech stack
+- Main source directories (`src/`, `lib/`, `app/`, etc.) - Architecture patterns
+- Configuration files - Environment and setup requirements
+- `docs/` directory - Additional documentation
+
+**Analysis questions:**
+- What is the primary purpose of this project? (web app, CLI tool, library, etc.)
+- Who are the users? (developers, end users, internal team)
+- What programming language(s) and frameworks are used?
+- Are there any unusual architectural patterns or design decisions?
+
+### 2. Fill in `guidelines/domain-explanation.md`:
+
+Based on your analysis, complete these sections:
+
+**What does this project do?**
+- 1-2 paragraphs explaining the purpose and value proposition
+- Include target users and main use cases
+
+**Key Concepts**
+- List 5-10 domain-specific terms with brief explanations
+- Include technical concepts that would confuse outsiders
+- Example: "JWT Token - Authentication token containing user claims"
+
+**Data Flow**
+- How data enters, transforms, and exits the system
+- Key integration points (APIs, databases, external services)
+- Important business logic flows
+
+### 3. Review and customize `CLAUDE.md`:
+
+Check if these need adjustment:
+- Architecture section - does it match the actual stack?
+- Coding patterns - are there specific conventions used?
+- Testing approach - does it align with existing practices?
+
+### 4. Identify any missing guidelines:
+
+Are there language-specific or framework-specific guidelines needed?
+- Java Spring Boot patterns
+- React component conventions
+- Database schema rules
+- API design principles
+
+---
+
+**Token-efficient approach:** Start with README.md and 2-3 key source files, then expand based on findings. Focus on what makes this project unique rather than documenting obvious patterns.
+
+EOF
+
+echo ""
