@@ -114,6 +114,22 @@ This project maintains detailed context in the `ai-context/` directory.
 3. Coding patterns → see language-specific guidelines in `ai-context/guidelines/` if available
 4. PR descriptions → `ai-context/guidelines/PR_DESCRIPTION_GUIDELINES.md`
 
+## Workflow Best Practices
+
+When starting work or resuming a task:
+1. Check `ai-context/sessions/` for recent files (last 3-7 days)
+2. Read relevant session files BEFORE autonomous exploration
+3. Use existing context as your starting point, not web searches
+
+When generating commit messages or PR descriptions:
+- Cover the FULL scope of changes, not just the last edit
+- Check session files to understand work done across multiple interactions
+- If unclear about scope, ask: "Should this cover work from [date] onwards?"
+
+When working with implementation plans:
+- Read the plan file before starting (if one exists in `ai-context/sessions/`)
+- Follow the plan as written - don't skip steps or deviate without asking
+
 ## Your Task
 
 When given code to analyze or refactor:

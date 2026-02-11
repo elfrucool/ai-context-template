@@ -67,7 +67,7 @@ fi
 
 echo "Creating ai-context/ in $TARGET ..."
 
-mkdir -p "$AI_CONTEXT"/{guidelines,scripts,sessions,til,reference,external,test-data,archive}
+mkdir -p "$AI_CONTEXT"/{guidelines,scripts,sessions,til,reference,external,test-data,archive,skills}
 
 # ── Copy core files ──────────────────────────────────────────────────
 
@@ -80,6 +80,8 @@ cp "$SCRIPT_DIR/core/guidelines/domain-explanation.md"          "$AI_CONTEXT/gui
 
 cp "$SCRIPT_DIR/core/scripts/move-context-files.py"  "$AI_CONTEXT/scripts/"
 cp "$SCRIPT_DIR/core/scripts/migrate-filenames.py"   "$AI_CONTEXT/scripts/"
+
+cp -r "$SCRIPT_DIR/core/skills/"* "$AI_CONTEXT/skills/"
 
 # ── Optional: Java TDD module ───────────────────────────────────────
 
@@ -185,6 +187,7 @@ echo "   reference/   - API specs and schemas"
 echo "   external/    - Context from other projects"
 echo "   test-data/   - Test data files"
 echo "   scripts/     - Utility scripts"
+echo "   skills/      - Workflow automation skills"
 echo "   archive/     - Outdated files"
 echo ""
 echo " Files:"
@@ -199,6 +202,9 @@ echo "   guidelines/JAVA_TEST_DATA_CREATION_GUIDELINES.md - Test data patterns"
 fi
 echo "   scripts/move-context-files.py          - Move files + update refs"
 echo "   scripts/migrate-filenames.py           - Rename session files"
+echo "   skills/commitmsg/      - /commitmsg - Smart commit message generation"
+echo "   skills/prmsg/          - /prmsg - PR description generation"
+echo "   skills/session-save/   - /session-save - Automated session summaries"
 echo ""
 echo " Next steps:"
 echo "   1. Fill in guidelines/domain-explanation.md with your project's concepts"

@@ -33,6 +33,7 @@ The script will:
 | `guidelines/domain-explanation.md` | Template — fill in your project's domain concepts |
 | `scripts/move-context-files.py` | Move files between ai-context subdirectories and update references |
 | `scripts/migrate-filenames.py` | Rename session files to include sequential ordering numbers |
+| `skills/` | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries) |
 
 ### Modules (optional)
 

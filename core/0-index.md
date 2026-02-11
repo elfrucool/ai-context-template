@@ -68,6 +68,14 @@ Utility scripts for managing this directory.
 - `migrate-filenames.py` - Renames session files to include sequential ordering numbers
 - `move-context-files.py` - Moves files between ai-context subdirectories and updates references
 
+### `skills/`
+
+Claude Code skills for workflow automation.
+
+- `/commitmsg` - Generate commit messages covering full session scope
+- `/prmsg` - Generate PR descriptions with complete context
+- `/session-save` - Save session summaries following standard format
+
 ### `archive/`
 
 Outdated files kept for historical reference.

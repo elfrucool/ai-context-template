@@ -155,7 +155,7 @@ Create a session summary when:
 - Major decisions made that affect future work
 - Work paused mid-task and context needs preservation
 
-**Always ask the user** before creating a session summary.
+**Always ask the user** before creating a session summary. When creating summaries, read related session files to ensure continuity - if this is session 02 of a topic, reference what happened in session 01.
 
 Partial summaries are acceptable if the user needs to leave mid-session.
 
