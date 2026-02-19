@@ -167,12 +167,20 @@ class SetupScriptTests(unittest.TestCase):
         ai_context = Path(self.test_dir) / "ai-context"
         self.assertTrue(ai_context.exists(), "ai-context/ directory not created")
         self.assertTrue((ai_context / "guidelines").exists(), "guidelines/ not created")
+        self.assertTrue((ai_context / "architecture").exists(), "architecture/ not created")
+        self.assertTrue((ai_context / "briefs").exists(), "briefs/ not created")
         self.assertTrue((ai_context / "scripts").exists(), "scripts/ not created")
         self.assertTrue((ai_context / "sessions").exists(), "sessions/ not created")
 
         # Check that core files exist
         self.assertTrue((ai_context / "CLAUDE.md").exists(), "CLAUDE.md not found")
         self.assertTrue((ai_context / "0-index.md").exists(), "0-index.md not found")
+
+        # Check that new architecture and briefs files exist
+        self.assertTrue((ai_context / "architecture" / "00-architecture-index.md").exists(), "architecture/00-architecture-index.md not found")
+        self.assertTrue((ai_context / "architecture" / "01-domain-explanation.md").exists(), "architecture/01-domain-explanation.md not found")
+        self.assertTrue((ai_context / "briefs" / "00-about-briefs.md").exists(), "briefs/00-about-briefs.md not found")
+        self.assertTrue((ai_context / "guidelines" / "BRIEF_CREATION_GUIDELINES.md").exists(), "guidelines/BRIEF_CREATION_GUIDELINES.md not found")
 
         # Check that .windsurf/workflows/ directory exists
         windsurf_workflows = Path(self.test_dir) / ".windsurf" / "workflows"
@@ -208,6 +216,10 @@ class SetupScriptTests(unittest.TestCase):
         # Check that ai-context directory structure was created
         ai_context = Path(self.test_dir) / "ai-context"
         self.assertTrue(ai_context.exists(), "ai-context/ directory not created")
+
+        # Check that new directories exist
+        self.assertTrue((ai_context / "architecture").exists(), "architecture/ not created")
+        self.assertTrue((ai_context / "briefs").exists(), "briefs/ not created")
 
         # Check that .windsurf/workflows/ directory exists
         windsurf_workflows = Path(self.test_dir) / ".windsurf" / "workflows"
