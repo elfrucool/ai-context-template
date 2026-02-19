@@ -24,12 +24,25 @@ ai-context
 
 Project-wide instructions for AI agents: architecture principles, coding guidelines, commit message conventions, and quick-reference pointers into this directory. The root `CLAUDE.md` is a stub that redirects here.
 
+### `architecture/`
+
+Stable reference documentation for system design and core concepts. Read when you need to understand how the system works.
+
+- `00-architecture-index.md` - Architecture overview and index
+- `01-domain-explanation.md` - Core domain concepts (fill in for your project)
+
+### `briefs/`
+
+High-level summaries of major features and changes. Read a brief first to get oriented, then dive into `sessions/` only if you need implementation-level detail.
+
+- `00-about-briefs.md` - Index of all briefs
+
 ### `guidelines/`
 
-Stable coding standards and domain knowledge. Read these before writing code.
+Stable coding standards and development processes. Read these before writing code.
 
 - `DEVELOPMENT_PROCESS.md` - End-to-end workflow (planning, implementation, summaries)
-- `domain-explanation.md` - Core domain concepts (fill in for your project)
+- `BRIEF_CREATION_GUIDELINES.md` - When and how to create feature briefs
 - `PR_DESCRIPTION_GUIDELINES.md` - PR description structure, JIRA ticket conventions
 <!-- Add language-specific guidelines here when installed (e.g., JAVA_*.md) -->
 

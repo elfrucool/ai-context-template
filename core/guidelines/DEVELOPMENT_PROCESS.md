@@ -26,8 +26,9 @@ Before starting any task, understand the current state:
    - Understand what was recently worked on
    - Identify ongoing work or decisions made
 
-2. **Read domain guidelines** (`guidelines/domain-explanation.md`)
-   - Refresh understanding of core concepts
+2. **Read architecture overview** (`architecture/00-architecture-index.md`)
+   - Understand system design and core concepts
+   - Reference `architecture/01-domain-explanation.md` if needed
 
 3. **Explore relevant codebase areas**
    - Read files that will be affected

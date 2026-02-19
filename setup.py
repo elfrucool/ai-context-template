@@ -32,6 +32,8 @@ SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
 # Subdirectories to create in ai-context/
 SUBDIRS = [
     "guidelines",
+    "architecture",
+    "briefs",
     "scripts",
     "sessions",
     "til",
@@ -48,7 +50,10 @@ CORE_FILES = [
     ("core/0-index.md", "ai-context/0-index.md"),
     ("core/guidelines/DEVELOPMENT_PROCESS.md", "ai-context/guidelines/"),
     ("core/guidelines/PR_DESCRIPTION_GUIDELINES.md", "ai-context/guidelines/"),
-    ("core/guidelines/domain-explanation.md", "ai-context/guidelines/"),
+    ("core/guidelines/BRIEF_CREATION_GUIDELINES.md", "ai-context/guidelines/"),
+    ("core/architecture/00-architecture-index.md", "ai-context/architecture/"),
+    ("core/architecture/01-domain-explanation.md", "ai-context/architecture/"),
+    ("core/briefs/00-about-briefs.md", "ai-context/briefs/"),
     ("core/scripts/move-context-files.py", "ai-context/scripts/"),
     ("core/scripts/migrate-filenames.py", "ai-context/scripts/"),
 ]
@@ -736,9 +741,12 @@ def print_summary(
     print(" Files:")
     print("   CLAUDE.md                              - Architecture principles")
     print("   0-index.md                             - Directory guide")
+    print("   architecture/00-architecture-index.md  - Architecture overview")
+    print("   architecture/01-domain-explanation.md  - Domain concepts (fill in!)")
+    print("   briefs/00-about-briefs.md              - Feature briefs index")
     print("   guidelines/DEVELOPMENT_PROCESS.md      - Workflow process")
+    print("   guidelines/BRIEF_CREATION_GUIDELINES.md - Brief creation process")
     print("   guidelines/PR_DESCRIPTION_GUIDELINES.md - PR format")
-    print("   guidelines/domain-explanation.md        - Domain concepts (fill in!)")
     if java_enabled:
         print("   guidelines/JAVA_UNIT_TESTING_GUIDELINES.md      - Java TDD")
         print("   guidelines/JAVA_TEST_DATA_CREATION_GUIDELINES.md - Test data patterns")
@@ -763,7 +771,7 @@ def print_summary(
             print(f"   Collisions: {', '.join(collisions)}")
     print("")
     print(" Next steps:")
-    print("   1. Fill in guidelines/domain-explanation.md with your project's concepts")
+    print("   1. Fill in architecture/01-domain-explanation.md with your project's concepts")
     print("   2. Review CLAUDE.md and adjust to your preferences")
     print("   3. Start a session and let the AI read 0-index.md first")
     print("")
@@ -796,7 +804,7 @@ def print_summary(
     print("- What programming language(s) and frameworks are used?")
     print("- Are there any unusual architectural patterns or design decisions?")
     print("")
-    print("### 2. Fill in `guidelines/domain-explanation.md`:")
+    print("### 2. Fill in `architecture/01-domain-explanation.md`:")
     print("")
     print("Based on your analysis, complete these sections:")
     print("")

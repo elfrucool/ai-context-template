@@ -86,6 +86,20 @@ Save to: `ai-context/sessions/YYYY-MM-DD-XX-<topic>.md`
 
 **Ask the user before saving**: "Should I save this to `ai-context/sessions/2026-02-11-01-authentication.md`?"
 
+### Step 5: Check for Brief-Worthy Work
+
+After saving the session:
+
+1. **Is this part of a larger feature?** Check if this session relates to an existing brief in `briefs/`
+   - If yes, mention that the brief exists: "This work relates to the brief at `briefs/YYYY-MM-DD-<feature>.md`"
+   - Suggest updating the brief's session file list if needed
+
+2. **Does this warrant a new brief?** Consider if the work is significant enough for a brief:
+   - Spanning 3+ session files?
+   - Major architectural change?
+   - Before handing off to another team?
+   - If yes: Mention `guidelines/BRIEF_CREATION_GUIDELINES.md` for the process
+
 ## What to Include
 
 From `DEVELOPMENT_PROCESS.md`:

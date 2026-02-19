@@ -109,10 +109,11 @@ This project maintains detailed context in the `ai-context/` directory.
 **Start here:** Read `ai-context/0-index.md` for directory structure and guidance on which files to read for different tasks.
 
 **Quick reference:**
-1. Domain understanding → `ai-context/guidelines/domain-explanation.md`
-2. Recent work context → `ai-context/sessions/` (check last 3-7 days)
-3. Coding patterns → see language-specific guidelines in `ai-context/guidelines/` if available
-4. PR descriptions → `ai-context/guidelines/PR_DESCRIPTION_GUIDELINES.md`
+1. Architecture overview → `ai-context/architecture/00-architecture-index.md`
+2. Feature overviews → `ai-context/briefs/00-about-briefs.md`
+3. Recent work context → `ai-context/sessions/` (check last 3-7 days)
+4. Coding patterns → see language-specific guidelines in `ai-context/guidelines/` if available
+5. PR descriptions → `ai-context/guidelines/PR_DESCRIPTION_GUIDELINES.md`
 
 ## Workflow Best Practices
 
