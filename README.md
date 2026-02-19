@@ -2,6 +2,10 @@
 
 A template for bootstrapping an `ai-context/` directory in any project. Provides a structured folder layout, coding guidelines, and workflow conventions that make AI-assisted development more effective.
 
+## Disclaimer
+
+This template represents my best effort to systematize AI-assisted development practices. I'm not an expert in this rapidly evolving field. I'm learning and iterating as the industry evolves. The approaches here are validated by recent industry trends (see **Comparison** section), but your team should adapt and customize these patterns to fit your own needs.
+
 ## Quick Start
 
 ```bash
@@ -9,7 +13,7 @@ A template for bootstrapping an `ai-context/` directory in any project. Provides
 python3 setup.py /path/to/your-project
 
 # With Java TDD guidelines
-python3 setup.py /path/to/your-project --java
+python3 setup.py /path/to/your-project --java --tdd
 ```
 
 The script will:
@@ -152,10 +156,52 @@ To create a new module:
    - Copy the module files into `ai-context/guidelines/`
    - Patch cross-references in `DEVELOPMENT_PROCESS.md`, `0-index.md`, and `CLAUDE.md`
 
-## Why darcs?
+## About Darcs and Version Control
 
-The `ai-context/` directory is excluded from git (it's local-only). Darcs provides lightweight local version control without interfering with git. It lets you track changes to your AI context files independently.
+**Why darcs?**
 
-If darcs isn't installed, everything still works — you just won't have version history for the context directory.
+The primary reason: Claude CLI's autocomplete breaks when it encounters nested `.git` folders. By using darcs for the `ai-context/` directory instead of git, we avoid nested VCS conflicts. This preserves autocomplete functionality while keeping the context directory version-controlled separately.
 
-Install darcs: https://darcs.net/
+(Note: The agent still recognizes and can work with files even when autocomplete is broken, so this is a UX improvement, not a hard blocker.)
+
+**If darcs isn't installed:**
+Everything still works—you just won't have version history for the context directory. This is fine for many workflows.
+
+**Install darcs:** https://darcs.net/
+
+**TODO:** Future versions of this template will let you choose your VCS strategy during setup: use git, use darcs, or skip version control for ai-context/ entirely. This will accommodate different team preferences and CLI tooling.
+
+## How This Compares to Other Approaches
+
+### Core Inspiration
+
+This template's architecture philosophy is built on work by [Alexander Dunlop](https://github.com/Alexanderdunlop/ai-architecture-prompts), who adapted principles from Eskil Steenberg's lecture on "Architecting LARGE Software Projects." The black-box modularity approach (treating modules as replaceable units with clean interfaces) comes directly from that foundation. Credit to Alexander for systematizing these ideas.
+
+### Industry Context
+
+Recent industry research (2025-2026) validates the approach:
+
+- **Context Engineering**: Tools like Google's Conductor now solve the same problem this template addresses—persistent, structured project context for AI agents
+- **Spec-Driven Development**: The emphasis on briefs and architecture before implementation aligns with emerging best practices that reduce AI-generated technical debt
+- **Documentation Hierarchy**: The three-level structure (architecture → briefs → sessions) reflects how teams are organizing AI-assisted development context
+
+See [Context Engineering: A Complete Guide 2026](https://codeconductor.ai/blog/context-engineering/) and [Spec-Driven Development alignment](https://www.webuild-ai.com/insights/aligning-spec-driven-development-and-context-engineering-for-2026) for more.
+
+### What Makes This Template Different
+
+- **Setup automation**: Bootstraps the full structure with one command, not manual file creation
+- **IDE integration**: Links skills to both Claude Code and Windsurf out of the box
+- **Opinionated but customizable**: Ships with architecture principles you can modify, rather than being blank
+
+### When to Use This vs. Roll Your Own
+
+Use this template if you want:
+- A structured starting point for multiple projects
+- Opinions on AI-assisted development workflow
+- Integration with Claude Code and Windsurf
+- Automated skill linking and setup
+
+Roll your own if you:
+- Prefer minimal structure
+- Have deeply different IDE/tooling requirements
+- Want to build your own philosophy from scratch
