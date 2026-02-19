@@ -30,13 +30,15 @@ The script will:
 |------|---------|
 | `CLAUDE.md` | Architecture principles, coding guidelines, commit conventions |
 | `0-index.md` | Directory guide — AI agents read this first |
+| `architecture/domain-explanation.md` | Template — fill in your project's domain concepts |
 | `guidelines/DEVELOPMENT_PROCESS.md` | Planning, implementation, and session summary workflow |
 | `guidelines/PR_DESCRIPTION_GUIDELINES.md` | PR description format with JIRA support |
 | `guidelines/SCRIPT_SECURITY_GUIDELINES.md` | Security review checklist — required before modifying/executing scripts |
-| `guidelines/domain-explanation.md` | Template — fill in your project's domain concepts |
+| `guidelines/BRIEF_CREATION_GUIDELINES.md` | Guidance on creating project briefs: timing, templates, quality checklist |
 | `scripts/move-context-files.py` | Move files between ai-context subdirectories and update references |
 | `scripts/migrate-filenames.py` | Rename session files to include sequential ordering numbers |
 | `skills/` | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries); linked to `.claude/skills/` and `.windsurf/workflows/` |
+| `til/` | "Today I Learned" entries — project-specific discoveries, patterns, and design decisions |
 
 ### Modules (optional)
 
@@ -70,10 +72,16 @@ your-project/
 └── ai-context/
     ├── 0-index.md
     ├── CLAUDE.md
+    ├── architecture/
+    │   ├── 00-architecture-index.md
+    │   └── 01-domain-explanation.md
+    ├── briefs/
+    │   └── 00-about-briefs.md
     ├── guidelines/
     │   ├── DEVELOPMENT_PROCESS.md
     │   ├── PR_DESCRIPTION_GUIDELINES.md
-    │   └── domain-explanation.md
+    │   ├── SCRIPT_SECURITY_GUIDELINES.md
+    │   └── BRIEF_CREATION_GUIDELINES.md
     ├── scripts/
     │   ├── move-context-files.py
     │   └── migrate-filenames.py
@@ -92,11 +100,46 @@ your-project/
     └── archive/                       # Outdated files
 ```
 
+## Documentation Hierarchy
+
+The template uses a three-level hierarchy for project context:
+
+1. **Architecture** (`architecture/`) — Stable, foundational documentation
+   - Domain concepts and problem space
+   - System design principles and constraints
+   - Read at project start to understand "what problem are we solving"
+
+2. **Briefs** (`briefs/`) — Project orientation documents
+   - High-level summaries of work in progress
+   - Context for multi-session efforts
+   - Read when resuming work or joining the project
+   - See `BRIEF_CREATION_GUIDELINES.md` for when and how to write briefs
+
+3. **Sessions** (`sessions/`) — Detailed conversation history
+   - Day-by-day development notes
+   - Specific implementations, decisions, and learnings
+   - Read for technical details on completed work
+
 ## After Setup
 
-1. **Fill in `guidelines/domain-explanation.md`** with your project's core concepts
+1. **Fill in `architecture/domain-explanation.md`** with your project's core concepts
 2. **Review `CLAUDE.md`** and adjust architecture principles to your preferences
 3. **Start a session** — tell the AI to read `ai-context/0-index.md` first
+
+## About Loading Project Rules in New Sessions
+
+**The challenge:** Each new AI session starts with blank context. Without explicit configuration, agents must decide when to load `CLAUDE.md` and `0-index.md`. This creates a choice between:
+
+- **Efficiency**: Load rules only when they seem relevant (saves tokens for quick questions)
+- **Consistency**: Always load rules first (ensures every session operates under the same constraints)
+
+**How you can ensure rules are loaded:**
+
+1. **Per prompt** — Manually ask agents to read `ai-context/0-index.md` at the start of your first message each session
+2. **Per project** — Some tools support configuration files that agents read automatically; you could create `.claude/project-config.json` to specify auto-load files
+3. **Team process** — Document in your team's onboarding that all AI-assisted work starts with reading the rules
+
+The best approach depends on your team's preference and tooling. For critical projects with multiple team members, explicit configuration or process is recommended.
 
 ## Adding New Modules
 
