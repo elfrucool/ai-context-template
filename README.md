@@ -6,19 +6,21 @@ A template for bootstrapping an `ai-context/` directory in any project. Provides
 
 ```bash
 # Basic setup (all projects)
-./setup.sh /path/to/your-project
+python3 setup.py /path/to/your-project
 
 # With Java TDD guidelines
-./setup.sh /path/to/your-project --java
+python3 setup.py /path/to/your-project --java
 ```
 
 The script will:
 1. Create `ai-context/` with all core files and empty subdirectories
 2. Copy a `CLAUDE.md` stub to your project root (if none exists)
 3. Copy a `.windsurf/rules.md` stub (if none exists)
-4. If `--java` is passed, install Java unit testing and test data guidelines
-5. Initialize darcs for local version control (if darcs is available)
-6. Offer to add `ai-context/` to `.gitignore`
+4. Link skills as .md files under `.windsurf/workflows/` (Windsurf Cascade integration)
+5. Link skills as directories under `.claude/skills/` (Claude Code integration)
+6. If `--java` is passed, install Java unit testing and test data guidelines
+7. Initialize darcs for local version control (if darcs is available)
+8. Offer to add `ai-context/` to `.gitignore`
 
 ## What's Included
 
@@ -30,10 +32,11 @@ The script will:
 | `0-index.md` | Directory guide — AI agents read this first |
 | `guidelines/DEVELOPMENT_PROCESS.md` | Planning, implementation, and session summary workflow |
 | `guidelines/PR_DESCRIPTION_GUIDELINES.md` | PR description format with JIRA support |
+| `guidelines/SCRIPT_SECURITY_GUIDELINES.md` | Security review checklist — required before modifying/executing scripts |
 | `guidelines/domain-explanation.md` | Template — fill in your project's domain concepts |
 | `scripts/move-context-files.py` | Move files between ai-context subdirectories and update references |
 | `scripts/migrate-filenames.py` | Rename session files to include sequential ordering numbers |
-| `skills/` | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries) |
+| `skills/` | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries); linked to `.claude/skills/` and `.windsurf/workflows/` |
 
 ### Modules (optional)
 
@@ -54,7 +57,16 @@ When installed, cross-references are automatically patched into `DEVELOPMENT_PRO
 your-project/
 ├── CLAUDE.md                         # Stub → ai-context/CLAUDE.md
 ├── .windsurf/
-│   └── rules.md                      # Stub → ai-context/CLAUDE.md
+│   ├── rules.md                      # Stub → ai-context/CLAUDE.md
+│   └── workflows/
+│       ├── commitmsg.md              # → ai-context/skills/commitmsg/SKILL.md
+│       ├── prmsg.md                  # → ai-context/skills/prmsg/SKILL.md
+│       └── session-save.md           # → ai-context/skills/session-save/SKILL.md
+├── .claude/
+│   └── skills/
+│       ├── commitmsg/                # → ai-context/skills/commitmsg/
+│       ├── prmsg/                    # → ai-context/skills/prmsg/
+│       └── session-save/             # → ai-context/skills/session-save/
 └── ai-context/
     ├── 0-index.md
     ├── CLAUDE.md
@@ -65,6 +77,13 @@ your-project/
     ├── scripts/
     │   ├── move-context-files.py
     │   └── migrate-filenames.py
+    ├── skills/
+    │   ├── commitmsg/
+    │   │   └── SKILL.md
+    │   ├── prmsg/
+    │   │   └── SKILL.md
+    │   └── session-save/
+    │       └── SKILL.md
     ├── sessions/                      # Session notes go here
     ├── til/                           # Today I Learned entries
     ├── reference/                     # API specs, schemas
@@ -85,7 +104,7 @@ To create a new module:
 
 1. Create a directory under `modules/` (e.g., `modules/python-pytest/`)
 2. Add your guideline files there
-3. Update `setup.sh` to:
+3. Update `setup.py` to:
    - Accept a new flag (e.g., `--python`)
    - Copy the module files into `ai-context/guidelines/`
    - Patch cross-references in `DEVELOPMENT_PROCESS.md`, `0-index.md`, and `CLAUDE.md`

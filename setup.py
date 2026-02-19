@@ -502,6 +502,112 @@ def link_skills_to_claude(
     return linked_count, skipped_count, collisions, partial_success
 
 
+def link_skills_to_windsurf(
+    target: pathlib.Path,
+    ai_context: pathlib.Path,
+    skills_behavior: str,
+) -> Tuple[int, int, List[str], bool]:
+    """Link skills as .md files into .windsurf/workflows/.
+
+    Returns:
+        Tuple of (linked_count, skipped_count, collision_names, partial_success)
+    """
+    print("Linking skills to .windsurf/workflows directory...")
+
+    windsurf_dir = target / ".windsurf"
+    windsurf_workflows = windsurf_dir / "workflows"
+    source_skills = ai_context / "skills"
+
+    linked_count = 0
+    skipped_count = 0
+    collisions = []
+    partial_success = False
+
+    # Create .windsurf/workflows directory if missing
+    if not windsurf_workflows.exists():
+        windsurf_workflows.mkdir(parents=True, exist_ok=True)
+        print("  Created .windsurf/workflows directory")
+
+    # Link each skill as a .md file
+    if source_skills.exists():
+        for skill_dir in sorted(source_skills.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+
+            skill_name = skill_dir.name
+            skill_md = skill_dir / "SKILL.md"
+
+            # Check if SKILL.md exists
+            if not skill_md.exists():
+                print(f"  Warning: {skill_name}/SKILL.md not found, skipping")
+                continue
+
+            # Target: .windsurf/workflows/{skill_name}.md
+            target_link = windsurf_workflows / f"{skill_name}.md"
+
+            # Check for collision
+            if target_link.exists() or target_link.is_symlink():
+                print(f"  Collision detected: {skill_name}.md already exists in .windsurf/workflows/")
+
+                if skills_behavior == "overwrite":
+                    if target_link.is_symlink():
+                        target_link.unlink()
+                    else:
+                        target_link.unlink()
+                    target_link.symlink_to(skill_md.resolve())
+                    print(f"    Overwrote {skill_name}.md")
+                    linked_count += 1
+
+                elif skills_behavior == "skip":
+                    print(f"    Skipped {skill_name}.md")
+                    skipped_count += 1
+                    collisions.append(f"{skill_name}.md")
+                    partial_success = True
+
+                elif skills_behavior == "backup":
+                    backup_file = target_link.parent / f"{target_link.name}.backup"
+                    counter = 1
+                    while backup_file.exists():
+                        backup_file = target_link.parent / f"{target_link.stem}.{counter}.md.backup"
+                        counter += 1
+                    target_link.rename(backup_file)
+                    print(f"    Backed up {skill_name}.md to {backup_file.name}")
+                    target_link.symlink_to(skill_md.resolve())
+                    print(f"    Overwrote {skill_name}.md (backup created)")
+                    linked_count += 1
+
+                elif skills_behavior == "prompt":
+                    if INTERACTIVE:
+                        answer = input(f"  Overwrite {skill_name}.md? [y/N] ").strip().lower()
+                        if answer in ("y", "yes"):
+                            if target_link.is_symlink():
+                                target_link.unlink()
+                            else:
+                                target_link.unlink()
+                            target_link.symlink_to(skill_md.resolve())
+                            print(f"    Overwrote {skill_name}.md")
+                            linked_count += 1
+                        else:
+                            print(f"    Skipped {skill_name}.md")
+                            skipped_count += 1
+                            collisions.append(f"{skill_name}.md")
+                            partial_success = True
+                    else:
+                        print(f"    Skipping {skill_name}.md (non-interactive mode)")
+                        skipped_count += 1
+                        collisions.append(f"{skill_name}.md")
+                        partial_success = True
+            else:
+                # No collision, create symlink
+                target_link.symlink_to(skill_md.resolve())
+                print(f"  Linked {skill_name}.md")
+                linked_count += 1
+
+    print(f"  Workflows linking complete: {linked_count} linked, {skipped_count} skipped")
+
+    return linked_count, skipped_count, collisions, partial_success
+
+
 # ──────────────────────────────────────────────────────────────────────
 # Darcs and Git Integration
 # ──────────────────────────────────────────────────────────────────────
@@ -642,12 +748,17 @@ def print_summary(
     print("   skills/prmsg/          - /prmsg - PR description generation")
     print("   skills/session-save/   - /session-save - Automated session summaries")
     print("")
+    print(" .windsurf/workflows:")
+    print("   Linked as .md files pointing to ai-context/skills/*/SKILL.md")
+    print("   Windsurf Cascade integration")
+    print("")
     print(" .claude/skills:")
-    print("   Linked to ai-context/skills for Windsurf Cascade compatibility")
+    print("   Linked as directories to ai-context/skills/")
+    print("   Claude Code integration")
     if linked_count > 0:
-        print(f"   {linked_count} skill(s) linked successfully")
+        print(f"   Total: {linked_count} skill(s) linked successfully")
     if skipped_count > 0:
-        print(f"   {skipped_count} skill(s) skipped (collisions)")
+        print(f"   Total: {skipped_count} skill(s) skipped (collisions)")
         if collisions:
             print(f"   Collisions: {', '.join(collisions)}")
     print("")
@@ -761,6 +872,17 @@ def main() -> None:
         ai_context,
         skills_behavior,
     )
+
+    # Link skills to .windsurf/workflows directory
+    wf_linked, wf_skipped, wf_collisions, wf_partial = link_skills_to_windsurf(
+        target,
+        ai_context,
+        skills_behavior,
+    )
+    linked_count += wf_linked
+    skipped_count += wf_skipped
+    collisions.extend(wf_collisions)
+    partial_success = partial_success or wf_partial
 
     # Initialize darcs
     init_darcs(ai_context)

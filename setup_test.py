@@ -174,6 +174,23 @@ class SetupScriptTests(unittest.TestCase):
         self.assertTrue((ai_context / "CLAUDE.md").exists(), "CLAUDE.md not found")
         self.assertTrue((ai_context / "0-index.md").exists(), "0-index.md not found")
 
+        # Check that .windsurf/workflows/ directory exists
+        windsurf_workflows = Path(self.test_dir) / ".windsurf" / "workflows"
+        self.assertTrue(windsurf_workflows.exists(), ".windsurf/workflows/ directory not created")
+
+        # Check that at least one .md symlink exists in .windsurf/workflows/
+        md_files = list(windsurf_workflows.glob("*.md"))
+        self.assertGreater(len(md_files), 0, "No .md files found in .windsurf/workflows/")
+
+        # Check that at least one symlink points to SKILL.md
+        for md_file in md_files:
+            if md_file.is_symlink():
+                target = md_file.resolve()
+                self.assertTrue(str(target).endswith("SKILL.md"), f"{md_file.name} symlink doesn't target SKILL.md")
+                break
+        else:
+            self.fail("No symlinks found in .windsurf/workflows/")
+
     # ──────────────────────────────────────────────────────────────────────
     # Test 8: Fresh install with explicit flags
     # ──────────────────────────────────────────────────────────────────────
@@ -191,6 +208,14 @@ class SetupScriptTests(unittest.TestCase):
         # Check that ai-context directory structure was created
         ai_context = Path(self.test_dir) / "ai-context"
         self.assertTrue(ai_context.exists(), "ai-context/ directory not created")
+
+        # Check that .windsurf/workflows/ directory exists
+        windsurf_workflows = Path(self.test_dir) / ".windsurf" / "workflows"
+        self.assertTrue(windsurf_workflows.exists(), ".windsurf/workflows/ directory not created")
+
+        # Check that at least one .md symlink exists
+        md_files = list(windsurf_workflows.glob("*.md"))
+        self.assertGreater(len(md_files), 0, "No .md files found in .windsurf/workflows/")
 
     # ──────────────────────────────────────────────────────────────────────
     # Test 9: Collision handling with --skills-skip
@@ -228,6 +253,31 @@ class SetupScriptTests(unittest.TestCase):
 
         # Now remove the ai-context we created so setup.py can run
         shutil.rmtree(ai_context)
+
+        # Run setup.py with --skills-skip
+        # This should create the structure, detect the collision, skip it, and exit with 1
+        exit_code, stdout, stderr = self.run_setup(None, "--skills-skip")
+        self.assertEqual(exit_code, 1, f"Expected exit 1, got {exit_code}")
+        self.assertIn("Collision detected", stdout)
+        self.assertIn("Skipped", stdout)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 10: Windsurf collision handling with --skills-skip
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_10_windsurf_collision_handling_skip(self):
+        """Test windsurf collision handling with --skills-skip returns exit code 1.
+
+        This test pre-creates a windsurf workflows collision before running setup.py,
+        then runs with --skills-skip and expects exit code 1 (partial success).
+        """
+        # Pre-create the .windsurf/workflows collision
+        windsurf_workflows = Path(self.test_dir) / ".windsurf" / "workflows"
+        windsurf_workflows.mkdir(parents=True, exist_ok=True)
+
+        # Create a collision by pre-creating one of the workflow files
+        collision_file = windsurf_workflows / "commitmsg.md"
+        collision_file.write_text("existing workflow content")
 
         # Run setup.py with --skills-skip
         # This should create the structure, detect the collision, skip it, and exit with 1
