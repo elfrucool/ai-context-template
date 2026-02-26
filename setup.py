@@ -61,7 +61,10 @@ CORE_FILES = [
 # Java TDD module files
 JAVA_FILES = [
     ("modules/java-tdd/JAVA_UNIT_TESTING_GUIDELINES.md", "ai-context/guidelines/"),
-    ("modules/java-tdd/JAVA_TEST_DATA_CREATION_GUIDELINES.md", "ai-context/guidelines/"),
+    (
+        "modules/java-tdd/JAVA_TEST_DATA_CREATION_GUIDELINES.md",
+        "ai-context/guidelines/",
+    ),
 ]
 
 # Java TDD patches: (filename, old_text, new_text)
@@ -96,6 +99,7 @@ JAVA_PATCHES = [
 # ──────────────────────────────────────────────────────────────────────
 # Argument Parsing
 # ──────────────────────────────────────────────────────────────────────
+
 
 def create_parser() -> argparse.ArgumentParser:
     """Create and configure the argument parser."""
@@ -203,6 +207,7 @@ EXIT CODES:
 # Behavior Resolution
 # ──────────────────────────────────────────────────────────────────────
 
+
 def resolve_skills_behavior(args) -> str:
     """Resolve skills collision behavior based on flags and environment."""
     if args.skills_overwrite:
@@ -243,6 +248,7 @@ def resolve_gitignore_behavior(args) -> str:
 # Validation
 # ──────────────────────────────────────────────────────────────────────
 
+
 def validate_target(target: Optional[str]) -> pathlib.Path:
     """Validate and resolve target path to absolute path.
 
@@ -263,7 +269,10 @@ def validate_target(target: Optional[str]) -> pathlib.Path:
         sys.exit(2)
 
     if not target_path.is_dir():
-        print(f"Error: target path does not exist or is not a directory: {target}", file=sys.stderr)
+        print(
+            f"Error: target path does not exist or is not a directory: {target}",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     return target_path
@@ -272,6 +281,7 @@ def validate_target(target: Optional[str]) -> pathlib.Path:
 # ──────────────────────────────────────────────────────────────────────
 # File Operations
 # ──────────────────────────────────────────────────────────────────────
+
 
 def create_directory_structure(target: pathlib.Path) -> pathlib.Path:
     """Create ai-context directory and subdirectories.
@@ -285,7 +295,10 @@ def create_directory_structure(target: pathlib.Path) -> pathlib.Path:
     ai_context = target / "ai-context"
 
     if ai_context.exists():
-        print(f"Error: {ai_context} already exists. Aborting to avoid overwriting.", file=sys.stderr)
+        print(
+            f"Error: {ai_context} already exists. Aborting to avoid overwriting.",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     print(f"Creating ai-context/ in {target} ...")
@@ -382,6 +395,7 @@ def copy_root_stubs(target: pathlib.Path) -> None:
 # Skills Linking
 # ──────────────────────────────────────────────────────────────────────
 
+
 def create_backup(source_dir: pathlib.Path, target_base: pathlib.Path) -> pathlib.Path:
     """Create timestamped backup of source directory.
 
@@ -447,7 +461,9 @@ def link_skills_to_claude(
 
             # Check for collision
             if target_link.exists() or target_link.is_symlink():
-                print(f"  Collision detected: {skill_name} already exists in .claude/skills/")
+                print(
+                    f"  Collision detected: {skill_name} already exists in .claude/skills/"
+                )
 
                 if skills_behavior == "overwrite":
                     if target_link.is_symlink():
@@ -477,7 +493,9 @@ def link_skills_to_claude(
 
                 elif skills_behavior == "prompt":
                     if INTERACTIVE:
-                        answer = input(f"  Overwrite {skill_name}? [y/N] ").strip().lower()
+                        answer = (
+                            input(f"  Overwrite {skill_name}? [y/N] ").strip().lower()
+                        )
                         if answer in ("y", "yes"):
                             if target_link.is_symlink():
                                 target_link.unlink()
@@ -552,7 +570,9 @@ def link_skills_to_windsurf(
 
             # Check for collision
             if target_link.exists() or target_link.is_symlink():
-                print(f"  Collision detected: {skill_name}.md already exists in .windsurf/workflows/")
+                print(
+                    f"  Collision detected: {skill_name}.md already exists in .windsurf/workflows/"
+                )
 
                 if skills_behavior == "overwrite":
                     if target_link.is_symlink():
@@ -573,7 +593,10 @@ def link_skills_to_windsurf(
                     backup_file = target_link.parent / f"{target_link.name}.backup"
                     counter = 1
                     while backup_file.exists():
-                        backup_file = target_link.parent / f"{target_link.stem}.{counter}.md.backup"
+                        backup_file = (
+                            target_link.parent
+                            / f"{target_link.stem}.{counter}.md.backup"
+                        )
                         counter += 1
                     target_link.rename(backup_file)
                     print(f"    Backed up {skill_name}.md to {backup_file.name}")
@@ -583,7 +606,11 @@ def link_skills_to_windsurf(
 
                 elif skills_behavior == "prompt":
                     if INTERACTIVE:
-                        answer = input(f"  Overwrite {skill_name}.md? [y/N] ").strip().lower()
+                        answer = (
+                            input(f"  Overwrite {skill_name}.md? [y/N] ")
+                            .strip()
+                            .lower()
+                        )
                         if answer in ("y", "yes"):
                             if target_link.is_symlink():
                                 target_link.unlink()
@@ -608,7 +635,9 @@ def link_skills_to_windsurf(
                 print(f"  Linked {skill_name}.md")
                 linked_count += 1
 
-    print(f"  Workflows linking complete: {linked_count} linked, {skipped_count} skipped")
+    print(
+        f"  Workflows linking complete: {linked_count} linked, {skipped_count} skipped"
+    )
 
     return linked_count, skipped_count, collisions, partial_success
 
@@ -617,11 +646,18 @@ def link_skills_to_windsurf(
 # Darcs and Git Integration
 # ──────────────────────────────────────────────────────────────────────
 
+
 def init_darcs(ai_context: pathlib.Path) -> None:
     """Initialize darcs in ai-context directory if available."""
     try:
-        subprocess.run(["darcs", "--version"], capture_output=True, check=True, timeout=5)
-    except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        subprocess.run(
+            ["darcs", "--version"], capture_output=True, check=True, timeout=5
+        )
+    except (
+        FileNotFoundError,
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+    ):
         print("")
         print("Tip: Install darcs for local version control of ai-context/.")
         print("  It keeps history without polluting git. See: https://darcs.net/")
@@ -658,6 +694,7 @@ def init_darcs(ai_context: pathlib.Path) -> None:
 # ──────────────────────────────────────────────────────────────────────
 # Gitignore Management
 # ──────────────────────────────────────────────────────────────────────
+
 
 def handle_gitignore(
     target: pathlib.Path,
@@ -711,6 +748,7 @@ def handle_gitignore(
 # Summary and Guidance Prompt
 # ──────────────────────────────────────────────────────────────────────
 
+
 def print_summary(
     ai_context: pathlib.Path,
     java_enabled: bool,
@@ -749,7 +787,9 @@ def print_summary(
     print("   guidelines/PR_DESCRIPTION_GUIDELINES.md - PR format")
     if java_enabled:
         print("   guidelines/JAVA_UNIT_TESTING_GUIDELINES.md      - Java TDD")
-        print("   guidelines/JAVA_TEST_DATA_CREATION_GUIDELINES.md - Test data patterns")
+        print(
+            "   guidelines/JAVA_TEST_DATA_CREATION_GUIDELINES.md - Test data patterns"
+        )
     print("   scripts/move-context-files.py          - Move files + update refs")
     print("   scripts/migrate-filenames.py           - Rename session files")
     print("   skills/commitmsg/      - /commitmsg - Smart commit message generation")
@@ -771,7 +811,9 @@ def print_summary(
             print(f"   Collisions: {', '.join(collisions)}")
     print("")
     print(" Next steps:")
-    print("   1. Fill in architecture/01-domain-explanation.md with your project's concepts")
+    print(
+        "   1. Fill in architecture/01-domain-explanation.md with your project's concepts"
+    )
     print("   2. Review CLAUDE.md and adjust to your preferences")
     print("   3. Start a session and let the AI read 0-index.md first")
     print("")
@@ -785,21 +827,50 @@ def print_summary(
     print("")
     print("---")
     print("")
+    print("## Introduction")
+    print("")
+    print(
+        "This project now has an `ai-context/` directory. Its purpose is to provide persistent"
+    )
+    print(
+        "context, guidelines, and session history for AI assistants working on this codebase."
+    )
+    print(
+        "Think of it as a memory or handbook for AI agents - it ensures that when you"
+    )
+    print(
+        "(or a different AI) resume work, you have the necessary background to be effective."
+    )
+    print("")
+    print("The directory contains:")
+    print("- Architecture principles and domain knowledge")
+    print("- Session notes documenting implementation history")
+    print("- Coding guidelines and development workflows")
+    print("- Today I Learned entries (TIL)")
+    print("")
     print("## Project Analysis and Template Setup")
     print("")
-    print("I need to analyze this project and fill in the ai-context templates. Please help me document:")
+    print(
+        "I need to analyze this project and fill in the ai-context templates. Please help me document:"
+    )
     print("")
     print("### 1. First, analyze the project structure:")
     print("")
     print("**Key files to examine (prioritized):**")
     print("- `README.md` - Project overview and purpose")
-    print("- `package.json`, `pom.xml`, `build.gradle`, `Cargo.toml`, etc. - Dependencies and tech stack")
-    print("- Main source directories (`src/`, `lib/`, `app/`, etc.) - Architecture patterns")
+    print(
+        "- `package.json`, `pom.xml`, `build.gradle`, `Cargo.toml`, etc. - Dependencies and tech stack"
+    )
+    print(
+        "- Main source directories (`src/`, `lib/`, `app/`, etc.) - Architecture patterns"
+    )
     print("- Configuration files - Environment and setup requirements")
     print("- `docs/` directory - Additional documentation")
     print("")
     print("**Analysis questions:**")
-    print("- What is the primary purpose of this project? (web app, CLI tool, library, etc.)")
+    print(
+        "- What is the primary purpose of this project? (web app, CLI tool, library, etc.)"
+    )
     print("- Who are the users? (developers, end users, internal team)")
     print("- What programming language(s) and frameworks are used?")
     print("- Are there any unusual architectural patterns or design decisions?")
@@ -815,7 +886,7 @@ def print_summary(
     print("**Key Concepts**")
     print("- List 5-10 domain-specific terms with brief explanations")
     print("- Include technical concepts that would confuse outsiders")
-    print("- Example: \"JWT Token - Authentication token containing user claims\"")
+    print('- Example: "JWT Token - Authentication token containing user claims"')
     print("")
     print("**Data Flow**")
     print("- How data enters, transforms, and exits the system")
@@ -839,7 +910,9 @@ def print_summary(
     print("")
     print("---")
     print("")
-    print("**Token-efficient approach:** Start with README.md and 2-3 key source files, then expand based on findings. Focus on what makes this project unique rather than documenting obvious patterns.")
+    print(
+        "**Token-efficient approach:** Start with README.md and 2-3 key source files, then expand based on findings. Focus on what makes this project unique rather than documenting obvious patterns."
+    )
     print("")
     print("")
 
@@ -847,6 +920,7 @@ def print_summary(
 # ──────────────────────────────────────────────────────────────────────
 # Main
 # ──────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     """Main entry point."""
