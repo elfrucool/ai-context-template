@@ -117,6 +117,10 @@ DEFAULT BEHAVIOR:
     → Skips skill collisions (defensive)
     → Skips .gitignore changes (defensive)
 
+SPECIAL ACTIONS:
+  --print-prompt: Print AI agent guidance prompt and exit
+    Useful for copying the setup assistance prompt separately
+
 FLAG PRECEDENCE:
   Explicit flags (--skills-*, --gitignore-*) take highest priority
   Mode flags (--auto, --interactive) override auto-detection
@@ -198,6 +202,14 @@ EXIT CODES:
         "--interactive",
         action="store_true",
         help="Force interactive mode (prompt for everything)",
+    )
+
+    # Special actions group (mutually exclusive with mode)
+    action_group = parser.add_mutually_exclusive_group()
+    action_group.add_argument(
+        "--print-prompt",
+        action="store_true",
+        help="Print AI agent guidance prompt and exit",
     )
 
     return parser
@@ -749,76 +761,8 @@ def handle_gitignore(
 # ──────────────────────────────────────────────────────────────────────
 
 
-def print_summary(
-    ai_context: pathlib.Path,
-    java_enabled: bool,
-    linked_count: int,
-    skipped_count: int,
-    collisions: List[str],
-) -> None:
-    """Print setup summary and guidance prompt."""
-    print("")
-    print("=" * 62)
-    print(" ai-context setup complete!")
-    print("=" * 62)
-    print("")
-    print(f" Installed in: {ai_context}")
-    print("")
-    print(" Directories:")
-    print("   guidelines/  - Coding standards and domain knowledge")
-    print("   sessions/    - Session notes (YYYY-MM-DD-XX-<topic>.md)")
-    print("   til/         - Today I Learned entries")
-    print("   reference/   - API specs and schemas")
-    print("   external/    - Context from other projects")
-    print("   test-data/   - Test data files")
-    print("   scripts/     - Utility scripts")
-    print("   skills/      - Workflow automation skills")
-    print("   archive/     - Outdated files")
-    print("   .claude/     - Windsurf Cascade integration (skills linked here)")
-    print("")
-    print(" Files:")
-    print("   CLAUDE.md                              - Architecture principles")
-    print("   0-index.md                             - Directory guide")
-    print("   architecture/00-architecture-index.md  - Architecture overview")
-    print("   architecture/01-domain-explanation.md  - Domain concepts (fill in!)")
-    print("   briefs/00-about-briefs.md              - Feature briefs index")
-    print("   guidelines/DEVELOPMENT_PROCESS.md      - Workflow process")
-    print("   guidelines/BRIEF_CREATION_GUIDELINES.md - Brief creation process")
-    print("   guidelines/PR_DESCRIPTION_GUIDELINES.md - PR format")
-    if java_enabled:
-        print("   guidelines/JAVA_UNIT_TESTING_GUIDELINES.md      - Java TDD")
-        print(
-            "   guidelines/JAVA_TEST_DATA_CREATION_GUIDELINES.md - Test data patterns"
-        )
-    print("   scripts/move-context-files.py          - Move files + update refs")
-    print("   scripts/migrate-filenames.py           - Rename session files")
-    print("   skills/commitmsg/      - /commitmsg - Smart commit message generation")
-    print("   skills/prmsg/          - /prmsg - PR description generation")
-    print("   skills/session-save/   - /session-save - Automated session summaries")
-    print("")
-    print(" .windsurf/workflows:")
-    print("   Linked as .md files pointing to ai-context/skills/*/SKILL.md")
-    print("   Windsurf Cascade integration")
-    print("")
-    print(" .claude/skills:")
-    print("   Linked as directories to ai-context/skills/")
-    print("   Claude Code integration")
-    if linked_count > 0:
-        print(f"   Total: {linked_count} skill(s) linked successfully")
-    if skipped_count > 0:
-        print(f"   Total: {skipped_count} skill(s) skipped (collisions)")
-        if collisions:
-            print(f"   Collisions: {', '.join(collisions)}")
-    print("")
-    print(" Next steps:")
-    print(
-        "   1. Fill in architecture/01-domain-explanation.md with your project's concepts"
-    )
-    print("   2. Review CLAUDE.md and adjust to your preferences")
-    print("   3. Start a session and let the AI read 0-index.md first")
-    print("")
-
-    # AI Agent Guidance Prompt
+def print_ai_agent_guidance_prompt() -> None:
+    """Print the AI agent setup assistance prompt."""
     print("=" * 62)
     print(" AI AGENT SETUP ASSISTANCE PROMPT")
     print("=" * 62)
@@ -914,6 +858,79 @@ def print_summary(
         "**Token-efficient approach:** Start with README.md and 2-3 key source files, then expand based on findings. Focus on what makes this project unique rather than documenting obvious patterns."
     )
     print("")
+
+
+def print_summary(
+    ai_context: pathlib.Path,
+    java_enabled: bool,
+    linked_count: int,
+    skipped_count: int,
+    collisions: List[str],
+) -> None:
+    """Print setup summary and guidance prompt."""
+    print("")
+    print("=" * 62)
+    print(" ai-context setup complete!")
+    print("=" * 62)
+    print("")
+    print(f" Installed in: {ai_context}")
+    print("")
+    print(" Directories:")
+    print("   guidelines/  - Coding standards and domain knowledge")
+    print("   sessions/    - Session notes (YYYY-MM-DD-XX-<topic>.md)")
+    print("   til/         - Today I Learned entries")
+    print("   reference/   - API specs and schemas")
+    print("   external/    - Context from other projects")
+    print("   test-data/   - Test data files")
+    print("   scripts/     - Utility scripts")
+    print("   skills/      - Workflow automation skills")
+    print("   archive/     - Outdated files")
+    print("   .claude/     - Windsurf Cascade integration (skills linked here)")
+    print("")
+    print(" Files:")
+    print("   CLAUDE.md                              - Architecture principles")
+    print("   0-index.md                             - Directory guide")
+    print("   architecture/00-architecture-index.md  - Architecture overview")
+    print("   architecture/01-domain-explanation.md  - Domain concepts (fill in!)")
+    print("   briefs/00-about-briefs.md              - Feature briefs index")
+    print("   guidelines/DEVELOPMENT_PROCESS.md      - Workflow process")
+    print("   guidelines/BRIEF_CREATION_GUIDELINES.md - Brief creation process")
+    print("   guidelines/PR_DESCRIPTION_GUIDELINES.md - PR format")
+    if java_enabled:
+        print("   guidelines/JAVA_UNIT_TESTING_GUIDELINES.md      - Java TDD")
+        print(
+            "   guidelines/JAVA_TEST_DATA_CREATION_GUIDELINES.md - Test data patterns"
+        )
+    print("   scripts/move-context-files.py          - Move files + update refs")
+    print("   scripts/migrate-filenames.py           - Rename session files")
+    print("   skills/commitmsg/      - /commitmsg - Smart commit message generation")
+    print("   skills/prmsg/          - /prmsg - PR description generation")
+    print("   skills/session-save/   - /session-save - Automated session summaries")
+    print("")
+    print(" .windsurf/workflows:")
+    print("   Linked as .md files pointing to ai-context/skills/*/SKILL.md")
+    print("   Windsurf Cascade integration")
+    print("")
+    print(" .claude/skills:")
+    print("   Linked as directories to ai-context/skills/")
+    print("   Claude Code integration")
+    if linked_count > 0:
+        print(f"   Total: {linked_count} skill(s) linked successfully")
+    if skipped_count > 0:
+        print(f"   Total: {skipped_count} skill(s) skipped (collisions)")
+        if collisions:
+            print(f"   Collisions: {', '.join(collisions)}")
+    print("")
+    print(" Next steps:")
+    print(
+        "   1. Fill in architecture/01-domain-explanation.md with your project's concepts"
+    )
+    print("   2. Review CLAUDE.md and adjust to your preferences")
+    print("   3. Start a session and let the AI read 0-index.md first")
+    print("")
+
+    # AI Agent Guidance Prompt
+    print_ai_agent_guidance_prompt()
     print("")
 
 
@@ -926,6 +943,11 @@ def main() -> None:
     """Main entry point."""
     parser = create_parser()
     args = parser.parse_args()
+
+    # Handle special actions
+    if args.print_prompt:
+        print_ai_agent_guidance_prompt()
+        sys.exit(0)
 
     # Validate target
     target = validate_target(args.target)
