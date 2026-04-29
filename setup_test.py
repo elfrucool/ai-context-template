@@ -199,6 +199,22 @@ class SetupScriptTests(unittest.TestCase):
         else:
             self.fail("No symlinks found in .windsurf/workflows/")
 
+        # Check that root-level symlinks point to ai-context/CLAUDE.md
+        root = Path(self.test_dir)
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        claude_md = root / "CLAUDE.md"
+        self.assertTrue(claude_md.is_symlink(), "CLAUDE.md is not a symlink")
+        self.assertEqual(claude_md.resolve(), ai_context_claude)
+
+        agents_md = root / "AGENTS.md"
+        self.assertTrue(agents_md.is_symlink(), "AGENTS.md is not a symlink")
+        self.assertEqual(agents_md.resolve(), ai_context_claude)
+
+        windsurf_rules = root / ".windsurf" / "rules.md"
+        self.assertTrue(windsurf_rules.is_symlink(), ".windsurf/rules.md is not a symlink")
+        self.assertEqual(windsurf_rules.resolve(), ai_context_claude)
+
     # ──────────────────────────────────────────────────────────────────────
     # Test 8: Fresh install with explicit flags
     # ──────────────────────────────────────────────────────────────────────

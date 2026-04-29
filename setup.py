@@ -379,28 +379,27 @@ def install_java_tdd_module(ai_context: pathlib.Path) -> None:
                 filepath.write_text(new_content)
 
 
-def copy_root_stubs(target: pathlib.Path) -> None:
-    """Copy root CLAUDE.md and .windsurf/rules.md if they don't exist."""
-    # CLAUDE.md stub
-    root_claude = target / "CLAUDE.md"
-    if not root_claude.exists():
-        src = SCRIPT_DIR / "core" / "root-CLAUDE.md"
-        if src.exists():
-            shutil.copy2(src, root_claude)
-            print(f"Created {root_claude} (stub → ai-context/CLAUDE.md)")
+def _create_symlink_stub(path: pathlib.Path, rel_target: str, label: str) -> None:
+    """Create a symlink at path pointing to rel_target, skip if already present."""
+    if path.is_symlink():
+        print(f"Skipped {label} (symlink already exists)")
+    elif path.exists():
+        print(f"Skipped {label} (regular file already exists)")
     else:
-        print(f"Skipped {root_claude} (already exists)")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.symlink_to(rel_target)
+        print(f"Created {label} (symlink → {rel_target})")
 
-    # Windsurf rules stub
-    windsurf_rules = target / ".windsurf" / "rules.md"
-    if not windsurf_rules.exists():
-        src = SCRIPT_DIR / "core" / "root-windsurf-rules.md"
-        if src.exists():
-            windsurf_rules.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, windsurf_rules)
-            print(f"Created {windsurf_rules} (stub → ai-context/CLAUDE.md)")
-    else:
-        print(f"Skipped {windsurf_rules} (already exists)")
+
+def copy_root_stubs(target: pathlib.Path) -> None:
+    """Create symlinks at root level pointing to ai-context/CLAUDE.md."""
+    _create_symlink_stub(target / "CLAUDE.md", "ai-context/CLAUDE.md", "CLAUDE.md")
+    _create_symlink_stub(target / "AGENTS.md", "ai-context/CLAUDE.md", "AGENTS.md")
+    _create_symlink_stub(
+        target / ".windsurf" / "rules.md",
+        "../ai-context/CLAUDE.md",
+        ".windsurf/rules.md",
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -888,7 +887,8 @@ def print_summary(
     print("   .claude/     - Windsurf Cascade integration (skills linked here)")
     print("")
     print(" Files:")
-    print("   CLAUDE.md                              - Architecture principles")
+    print("   CLAUDE.md  → ai-context/CLAUDE.md      - Architecture principles (symlink)")
+    print("   AGENTS.md  → ai-context/CLAUDE.md      - Architecture principles (symlink)")
     print("   0-index.md                             - Directory guide")
     print("   architecture/00-architecture-index.md  - Architecture overview")
     print("   architecture/01-domain-explanation.md  - Domain concepts (fill in!)")
@@ -907,8 +907,9 @@ def print_summary(
     print("   skills/prmsg/          - /prmsg - PR description generation")
     print("   skills/session-save/   - /session-save - Automated session summaries")
     print("")
-    print(" .windsurf/workflows:")
-    print("   Linked as .md files pointing to ai-context/skills/*/SKILL.md")
+    print(" .windsurf/:")
+    print("   rules.md → ../ai-context/CLAUDE.md     - AI rules (symlink)")
+    print("   workflows/ - Linked as .md files pointing to ai-context/skills/*/SKILL.md")
     print("   Windsurf Cascade integration")
     print("")
     print(" .claude/skills:")
