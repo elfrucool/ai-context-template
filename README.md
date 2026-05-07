@@ -23,27 +23,29 @@ The script will:
 3. Copy a `.windsurf/rules.md` stub (if none exists)
 4. Link skills as .md files under `.windsurf/workflows/` (Windsurf Cascade integration)
 5. Link skills as directories under `.claude/skills/` (Claude Code integration)
-6. If `--java` is passed, install Java unit testing and test data guidelines
-7. Initialize darcs for local version control (if darcs is available)
-8. Offer to add `ai-context/` to `.gitignore`
+6. Link skills as directories under `.opencode/skills/` (OpenCode integration)
+7. Link skills as directories under `.agents/skills/` (Codex integration)
+8. If `--java` is passed, install Java unit testing and test data guidelines
+9. Initialize darcs for local version control (if darcs is available)
+10. Offer to add `ai-context/` to `.gitignore`
 
 ## What's Included
 
 ### Core (always installed)
 
-| File                                       | Purpose                                                                                                                                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `CLAUDE.md`                                | Architecture principles, coding guidelines, commit conventions                                                                                                           |
-| `0-index.md`                               | Directory guide — AI agents read this first                                                                                                                              |
-| `architecture/domain-explanation.md`       | Template — fill in your project's domain concepts                                                                                                                        |
-| `guidelines/DEVELOPMENT_PROCESS.md`        | Planning, implementation, and session summary workflow                                                                                                                   |
-| `guidelines/PR_DESCRIPTION_GUIDELINES.md`  | PR description format with JIRA support                                                                                                                                  |
-| `guidelines/SCRIPT_SECURITY_GUIDELINES.md` | Security review checklist — required before modifying/executing scripts                                                                                                  |
-| `guidelines/BRIEF_CREATION_GUIDELINES.md`  | Guidance on creating project briefs: timing, templates, quality checklist                                                                                                |
-| `scripts/move-context-files.py`            | Move files between ai-context subdirectories and update references                                                                                                       |
-| `scripts/migrate-filenames.py`             | Rename session files to include sequential ordering numbers                                                                                                              |
-| `skills/`                                  | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries); linked to `.claude/skills/` and `.windsurf/workflows/` |
-| `til/`                                     | "Today I Learned" entries — project-specific discoveries, patterns, and design decisions                                                                                 |
+| File                                       | Purpose                                                                                                                                                                                                           |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLAUDE.md`                                | Architecture principles, coding guidelines, commit conventions                                                                                                                                                    |
+| `0-index.md`                               | Directory guide — AI agents read this first                                                                                                                                                                       |
+| `architecture/domain-explanation.md`       | Template — fill in your project's domain concepts                                                                                                                                                                 |
+| `guidelines/DEVELOPMENT_PROCESS.md`        | Planning, implementation, and session summary workflow                                                                                                                                                            |
+| `guidelines/PR_DESCRIPTION_GUIDELINES.md`  | PR description format with JIRA support                                                                                                                                                                           |
+| `guidelines/SCRIPT_SECURITY_GUIDELINES.md` | Security review checklist — required before modifying/executing scripts                                                                                                                                           |
+| `guidelines/BRIEF_CREATION_GUIDELINES.md`  | Guidance on creating project briefs: timing, templates, quality checklist                                                                                                                                         |
+| `scripts/move-context-files.py`            | Move files between ai-context subdirectories and update references                                                                                                                                                |
+| `scripts/migrate-filenames.py`             | Rename session files to include sequential ordering numbers                                                                                                                                                       |
+| `skills/`                                  | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries); linked to `.claude/skills/`, `.opencode/skills/`, `.agents/skills/`, and `.windsurf/workflows/` |
+| `til/`                                     | "Today I Learned" entries — project-specific discoveries, patterns, and design decisions                                                                                                                          |
 
 ### Modules (optional)
 
@@ -70,6 +72,16 @@ your-project/
 │       ├── prmsg.md                  # → ai-context/skills/prmsg/SKILL.md
 │       └── session-save.md           # → ai-context/skills/session-save/SKILL.md
 ├── .claude/
+│   └── skills/
+│       ├── commitmsg/                # → ai-context/skills/commitmsg/
+│       ├── prmsg/                    # → ai-context/skills/prmsg/
+│       └── session-save/             # → ai-context/skills/session-save/
+├── .opencode/
+│   └── skills/
+│       ├── commitmsg/                # → ai-context/skills/commitmsg/
+│       ├── prmsg/                    # → ai-context/skills/prmsg/
+│       └── session-save/             # → ai-context/skills/session-save/
+├── .agents/
 │   └── skills/
 │       ├── commitmsg/                # → ai-context/skills/commitmsg/
 │       ├── prmsg/                    # → ai-context/skills/prmsg/
@@ -105,6 +117,50 @@ your-project/
     └── archive/                       # Outdated files
 ```
 
+your-project/
+├── CLAUDE.md # Stub → ai-context/CLAUDE.md
+├── .windsurf/
+│ ├── rules.md # Stub → ai-context/CLAUDE.md
+│ └── workflows/
+│ ├── commitmsg.md # → ai-context/skills/commitmsg/SKILL.md
+│ ├── prmsg.md # → ai-context/skills/prmsg/SKILL.md
+│ └── session-save.md # → ai-context/skills/session-save/SKILL.md
+├── .claude/
+│ └── skills/
+│ ├── commitmsg/ # → ai-context/skills/commitmsg/
+│ ├── prmsg/ # → ai-context/skills/prmsg/
+│ └── session-save/ # → ai-context/skills/session-save/
+└── ai-context/
+├── 0-index.md
+├── CLAUDE.md
+├── architecture/
+│ ├── 00-architecture-index.md
+│ └── 01-domain-explanation.md
+├── briefs/
+│ └── 00-about-briefs.md
+├── guidelines/
+│ ├── DEVELOPMENT_PROCESS.md
+│ ├── PR_DESCRIPTION_GUIDELINES.md
+│ ├── SCRIPT_SECURITY_GUIDELINES.md
+│ └── BRIEF_CREATION_GUIDELINES.md
+├── scripts/
+│ ├── move-context-files.py
+│ └── migrate-filenames.py
+├── skills/
+│ ├── commitmsg/
+│ │ └── SKILL.md
+│ ├── prmsg/
+│ │ └── SKILL.md
+│ └── session-save/
+│ └── SKILL.md
+├── sessions/ # Session notes go here
+├── til/ # Today I Learned entries
+├── reference/ # API specs, schemas
+├── external/ # Context from other projects
+├── test-data/ # Test data files
+└── archive/ # Outdated files
+
+```
 ## Documentation Hierarchy
 
 The template uses a three-level hierarchy for project context:
@@ -191,7 +247,7 @@ See [Context Engineering: A Complete Guide 2026](https://codeconductor.ai/blog/c
 ### What Makes This Template Different
 
 - **Setup automation**: Bootstraps the full structure with one command, not manual file creation
-- **IDE integration**: Links skills to both Claude Code and Windsurf out of the box
+- **IDE integration**: Links skills to Claude Code, OpenCode, Codex, and Windsurf out of the box
 - **Opinionated but customizable**: Ships with architecture principles you can modify, rather than being blank
 
 ### When to Use This vs. Roll Your Own
@@ -200,7 +256,7 @@ Use this template if you want:
 
 - A structured starting point for multiple projects
 - Opinions on AI-assisted development workflow
-- Integration with Claude Code and Windsurf
+- Integration with Claude Code, OpenCode, Codex, or Windsurf
 - Automated skill linking and setup
 
 Roll your own if you:
@@ -208,3 +264,4 @@ Roll your own if you:
 - Prefer minimal structure
 - Have deeply different IDE/tooling requirements
 - Want to build your own philosophy from scratch
+```

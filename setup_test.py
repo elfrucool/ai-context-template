@@ -537,6 +537,110 @@ class SetupScriptTests(unittest.TestCase):
         self.assertEqual(exit_code, 1, f"Expected exit 1, got {exit_code}")
         self.assertIn("Collision detected", stdout)
 
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 21: OpenCode .opencode/skills/ directory created
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_21_opencode_skills_directory_created(self):
+        """Test that .opencode/skills/ directory is created with symlinks."""
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        # Check that .opencode/skills/ directory exists
+        opencode_skills = Path(self.test_dir) / ".opencode" / "skills"
+        self.assertTrue(opencode_skills.exists(), ".opencode/skills/ directory not created")
+
+        # Check that at least one skill symlink exists
+        skill_dirs = list(opencode_skills.iterdir())
+        self.assertGreater(len(skill_dirs), 0, "No skills linked in .opencode/skills/")
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 22: OpenCode skills are symlinks to ai-context/skills/
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_22_opencode_skills_are_symlinks(self):
+        """Test that OpenCode skills are symlinks pointing to ai-context/skills/."""
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        opencode_skills = Path(self.test_dir) / ".opencode" / "skills"
+        ai_context_skills = Path(self.test_dir) / "ai-context" / "skills"
+
+        # Check that each skill in .opencode/skills/ is a symlink to ai-context/skills/
+        for skill_dir in opencode_skills.iterdir():
+            self.assertTrue(skill_dir.is_symlink(), f"{skill_dir.name} is not a symlink")
+            self.assertEqual(
+                skill_dir.resolve().parent,
+                ai_context_skills.resolve(),
+                f"{skill_dir.name} doesn't point to ai-context/skills/"
+            )
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 23: OpenCode skills have valid frontmatter
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_23_opencode_skills_have_frontmatter(self):
+        """Test that OpenCode skills have YAML frontmatter with name and description."""
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context_skills = Path(self.test_dir) / "ai-context" / "skills"
+
+        # Check that each skill has valid frontmatter
+        for skill_dir in ai_context_skills.iterdir():
+            if not skill_dir.is_dir():
+                continue
+
+            skill_md = skill_dir / "SKILL.md"
+            self.assertTrue(skill_md.exists(), f"{skill_md.name}/SKILL.md not found")
+
+            content = skill_md.read_text()
+            self.assertTrue(content.startswith("---"), f"{skill_dir.name}/SKILL.md doesn't start with frontmatter")
+
+            # Check required frontmatter fields
+            self.assertIn("name:", content, f"{skill_dir.name}/SKILL.md missing name field")
+            self.assertIn("description:", content, f"{skill_dir.name}/SKILL.md missing description field")
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 24: OpenCode collision handling with --skills-skip
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_24_opencode_collision_handling_skip(self):
+        """Test OpenCode collision handling with --skills-skip returns exit code 1."""
+        # Pre-create ai-context with skills first
+        ai_context = Path(self.test_dir) / "ai-context"
+        ai_context.mkdir(parents=True, exist_ok=True)
+
+        src_skills = self.script_dir / "core" / "skills"
+        if src_skills.exists():
+            dst_skills = ai_context / "skills"
+            shutil.copytree(src_skills, dst_skills)
+
+        # Pre-create the .opencode/skills collision
+        opencode_skills = Path(self.test_dir) / ".opencode" / "skills"
+        opencode_skills.mkdir(parents=True, exist_ok=True)
+
+        # Create a collision by pre-creating one of the skill directories
+        ai_context_skills = ai_context / "skills"
+        if ai_context_skills.exists():
+            for skill in ai_context_skills.iterdir():
+                if skill.is_dir():
+                    collision_target = opencode_skills / skill.name
+                    collision_target.mkdir(parents=True, exist_ok=True)
+                    (collision_target / "dummy.txt").write_text("existing content")
+                    break
+
+        # Remove ai-context to let setup.py run fresh
+        shutil.rmtree(ai_context)
+
+        # Run setup.py with --skills-skip
+        exit_code, stdout, stderr = self.run_setup(None, "--skills-skip")
+        self.assertEqual(exit_code, 1, f"Expected exit 1, got {exit_code}")
+        self.assertIn("Collision detected", stdout)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

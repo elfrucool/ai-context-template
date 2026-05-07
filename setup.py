@@ -836,6 +836,160 @@ def link_skills_to_codex(
     return linked_count, skipped_count, collisions, partial_success
 
 
+def add_opencode_frontmatter(skill_md_path: pathlib.Path) -> bool:
+    """Add OpenCode frontmatter to a skill file if not present.
+
+    Returns:
+        True if frontmatter was added, False if already present or file doesn't exist.
+    """
+    if not skill_md_path.exists():
+        return False
+
+    content = skill_md_path.read_text()
+
+    if content.startswith("---"):
+        return False
+
+    skill_name = skill_md_path.parent.name
+    description = _extract_skill_description(content)
+
+    frontmatter = f"""---
+name: {skill_name}
+description: {description}
+compatibility: opencode
+---
+
+"""
+    new_content = frontmatter + content
+    skill_md_path.write_text(new_content)
+    return True
+
+
+def _extract_skill_description(skill_content: str) -> str:
+    """Extract a description from skill content for OpenCode frontmatter."""
+    lines = skill_content.strip().split("\n")
+    for line in lines:
+        line = line.strip()
+        if line.startswith("# `/"):
+            rest = line.replace("# `/", "").replace("` - ", " - ").replace("`", "")
+            if " - " in rest:
+                return rest.split(" - ", 1)[1].strip()
+        elif line.startswith("# /"):
+            rest = line.replace("# /", "").strip()
+            if " - " in rest:
+                return rest.split(" - ", 1)[1].strip()
+
+    return "Custom skill for this project"
+
+
+def link_skills_to_opencode(
+    target: pathlib.Path,
+    ai_context: pathlib.Path,
+    skills_behavior: str,
+) -> Tuple[int, int, List[str], bool]:
+    """Link skills from ai-context/skills to .opencode/skills.
+
+    Returns:
+        Tuple of (linked_count, skipped_count, collision_names, partial_success)
+    """
+    print("Linking skills to .opencode directory...")
+
+    opencode_dir = target / ".opencode"
+    opencode_skills = opencode_dir / "skills"
+    source_skills = ai_context / "skills"
+
+    linked_count = 0
+    skipped_count = 0
+    collisions = []
+    partial_success = False
+
+    if not opencode_dir.exists():
+        opencode_dir.mkdir(parents=True, exist_ok=True)
+        print("  Created .opencode directory")
+
+    if not opencode_skills.exists():
+        opencode_skills.mkdir(parents=True, exist_ok=True)
+        print("  Created .opencode/skills directory")
+
+    if source_skills.exists():
+        for skill_dir in sorted(source_skills.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+
+            skill_name = skill_dir.name
+            skill_md = skill_dir / "SKILL.md"
+            target_link = opencode_skills / skill_name
+
+            if not skill_md.exists():
+                print(f"  Warning: {skill_name}/SKILL.md not found, skipping")
+                continue
+
+            was_added = add_opencode_frontmatter(skill_md)
+            if was_added:
+                print(f"  Added OpenCode frontmatter to {skill_name}")
+
+            if target_link.exists() or target_link.is_symlink():
+                print(f"  Collision detected: {skill_name} already exists in .opencode/skills/")
+
+                if skills_behavior == "overwrite":
+                    if target_link.is_symlink():
+                        target_link.unlink()
+                    else:
+                        shutil.rmtree(target_link)
+                    target_link.symlink_to(skill_dir)
+                    print(f"    Overwrote {skill_name}")
+                    linked_count += 1
+
+                elif skills_behavior == "skip":
+                    print(f"    Skipped {skill_name}")
+                    skipped_count += 1
+                    collisions.append(skill_name)
+                    partial_success = True
+
+                elif skills_behavior == "backup":
+                    backup_dir = create_backup(target_link, target_link)
+                    print(f"    Backed up {skill_name} to {backup_dir.name}")
+                    if target_link.is_symlink():
+                        target_link.unlink()
+                    else:
+                        shutil.rmtree(target_link)
+                    target_link.symlink_to(skill_dir)
+                    print(f"    Overwrote {skill_name} (backup created)")
+                    linked_count += 1
+
+                elif skills_behavior == "prompt":
+                    if INTERACTIVE:
+                        answer = (
+                            input(f"  Overwrite {skill_name}? [y/N] ").strip().lower()
+                        )
+                        if answer in ("y", "yes"):
+                            if target_link.is_symlink():
+                                target_link.unlink()
+                            else:
+                                shutil.rmtree(target_link)
+                            target_link.symlink_to(skill_dir)
+                            print(f"    Overwrote {skill_name}")
+                            linked_count += 1
+                        else:
+                            print(f"    Skipped {skill_name}")
+                            skipped_count += 1
+                            collisions.append(skill_name)
+                            partial_success = True
+                    else:
+                        print(f"    Skipping {skill_name} (non-interactive mode)")
+                        skipped_count += 1
+                        collisions.append(skill_name)
+                        partial_success = True
+            else:
+                target_link.symlink_to(skill_dir)
+                print(f"  Linked {skill_name}")
+                linked_count += 1
+
+    print(f"  OpenCode linking complete: {linked_count} linked, {skipped_count} skipped")
+
+    return linked_count, skipped_count, collisions, partial_success
+
+
 # ──────────────────────────────────────────────────────────────────────
 # Darcs and Git Integration
 # ──────────────────────────────────────────────────────────────────────
@@ -1110,6 +1264,10 @@ def print_summary(
     print(" .agents/skills:")
     print("   Linked as directories to ai-context/skills/")
     print("   Codex integration")
+    print("")
+    print(" .opencode/skills:")
+    print("   Linked as directories to ai-context/skills/")
+    print("   OpenCode integration")
     if linked_count > 0:
         print(f"   Total: {linked_count} skill(s) linked successfully")
     if skipped_count > 0:
@@ -1221,6 +1379,17 @@ def main() -> None:
     skipped_count += codex_skipped
     collisions.extend(codex_collisions)
     partial_success = partial_success or codex_partial
+
+    # Link skills to .opencode directory (OpenCode)
+    opencode_linked, opencode_skipped, opencode_collisions, opencode_partial = link_skills_to_opencode(
+        target,
+        ai_context,
+        skills_behavior,
+    )
+    linked_count += opencode_linked
+    skipped_count += opencode_skipped
+    collisions.extend(opencode_collisions)
+    partial_success = partial_success or opencode_partial
 
     # Initialize darcs based on behavior
     if darcs_behavior == "auto":
