@@ -290,8 +290,7 @@ class SetupScriptTests(unittest.TestCase):
         self.assertIn("Skipped", stdout)
 
     # ──────────────────────────────────────────────────────────────────────
-    # Test 10: Windsurf collision handling with --skills-skip
-    # ──────────────────────────────────────────────────────────────────────
+# Test 10: Windsurf collision handling with --skills-skip
 
     def test_10_windsurf_collision_handling_skip(self):
         """Test windsurf collision handling with --skills-skip returns exit code 1.
@@ -313,6 +312,152 @@ class SetupScriptTests(unittest.TestCase):
         self.assertEqual(exit_code, 1, f"Expected exit 1, got {exit_code}")
         self.assertIn("Collision detected", stdout)
         self.assertIn("Skipped", stdout)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 11: Conflicting darcs flags
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_11_darcs_conflict_skip_auto(self):
+        """Test --darcs-skip and --darcs-auto conflict returns exit code 2."""
+        exit_code, stdout, stderr = self.run_setup(
+            None,
+            "--darcs-skip",
+            "--darcs-auto",
+        )
+
+        self.assertEqual(exit_code, 2, f"Expected exit 2, got {exit_code}")
+        self.assertIn("not allowed with argument", stderr)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 12: Conflicting tracking flags
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_12_tracking_conflict_ignore_track(self):
+        """Test --tracking-ignore and --tracking-track conflict returns exit code 2."""
+        exit_code, stdout, stderr = self.run_setup(
+            None,
+            "--tracking-ignore",
+            "--tracking-track",
+        )
+
+        self.assertEqual(exit_code, 2, f"Expected exit 2, got {exit_code}")
+        self.assertIn("not allowed with argument", stderr)
+
+# ──────────────────────────────────────────────────────────────────────
+    # Test 13: --shared conflicts with --darcs-*
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_13_shared_darcs_conflict(self):
+        """Test --shared and --darcs-auto conflict returns exit code 2."""
+        exit_code, stdout, stderr = self.run_setup(
+            None,
+            "--shared",
+            "--darcs-auto",
+        )
+
+        self.assertEqual(exit_code, 2, f"Expected exit 2, got {exit_code}")
+        self.assertIn("--shared not allowed with", stderr)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 14: Shared mode flag (ai-context in parent git, no darcs)
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_14_shared_mode(self):
+        """Test --shared flag returns exit code 0.
+
+        --shared means: no darcs (--darcs-skip implied) + track in git (--tracking-track implied)
+        """
+        exit_code, stdout, stderr = self.run_setup(None, "--shared")
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        # ai-context should be created
+        ai_context = Path(self.test_dir) / "ai-context"
+        self.assertTrue(ai_context.exists(), "ai-context/ directory not created")
+
+        # Darcs should NOT be initialized (no _darcs directory)
+        self.assertFalse((ai_context / "_darcs").exists(), "_darcs should not exist in shared mode")
+
+        # .gitignore should NOT have ai-context/ (it's tracked, not ignored)
+        gitignore = Path(self.test_dir) / ".gitignore"
+        if gitignore.exists():
+            content = gitignore.read_text()
+            self.assertNotIn("ai-context/", content)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 15: Standalone mode flag (darcs if avail, ignore in git)
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_15_standalone_mode(self):
+        """Test --standalone flag returns exit code 0.
+
+        --standalone means: darcs if available (--darcs-auto implied) + ignore in git (--tracking-ignore implied)
+        """
+        exit_code, stdout, stderr = self.run_setup(None, "--standalone")
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        # ai-context should be created
+        ai_context = Path(self.test_dir) / "ai-context"
+        self.assertTrue(ai_context.exists(), "ai-context/ directory not created")
+
+        # .gitignore SHOULD have ai-context/ (it's ignored, not tracked)
+        gitignore = Path(self.test_dir) / ".gitignore"
+        self.assertTrue(gitignore.exists(), ".gitignore should exist in standalone mode")
+        content = gitignore.read_text()
+        self.assertIn("ai-context/", content)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 16: Explicit --darcs-skip with --tracking-track
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_16_darcs_skip_tracking_track(self):
+        """Test --darcs-skip with --tracking-track returns exit code 0."""
+        exit_code, stdout, stderr = self.run_setup(
+            None,
+            "--darcs-skip",
+            "--tracking-track",
+        )
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context = Path(self.test_dir) / "ai-context"
+        self.assertTrue(ai_context.exists(), "ai-context/ directory not created")
+
+        # No _darcs directory
+        self.assertFalse((ai_context / "_darcs").exists(), "_darcs should not exist")
+
+        # No ai-context/ in .gitignore
+        gitignore = Path(self.test_dir) / ".gitignore"
+        if gitignore.exists():
+            content = gitignore.read_text()
+            self.assertNotIn("ai-context/", content)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 17: Explicit --darcs-skip with --tracking-ignore
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_17_darcs_skip_tracking_ignore(self):
+        """Test --darcs-skip with --tracking-ignore returns exit code 0."""
+        exit_code, stdout, stderr = self.run_setup(
+            None,
+            "--darcs-skip",
+            "--tracking-ignore",
+        )
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context = Path(self.test_dir) / "ai-context"
+        self.assertTrue(ai_context.exists(), "ai-context/ directory not created")
+
+        # No _darcs directory
+        self.assertFalse((ai_context / "_darcs").exists(), "_darcs should not exist")
+
+        # .gitignore SHOULD have ai-context/
+        gitignore = Path(self.test_dir) / ".gitignore"
+        self.assertTrue(gitignore.exists(), ".gitignore should exist")
+        content = gitignore.read_text()
+        self.assertIn("ai-context/", content)
 
 
 if __name__ == "__main__":

@@ -196,12 +196,56 @@ EXIT CODES:
     mode_group.add_argument(
         "--auto",
         action="store_true",
-        help="Defensive automation (skip collisions, skip gitignore)",
+        help="Defensive automation (skip collisions, skip darcs, prompt gitignore)",
     )
     mode_group.add_argument(
         "--interactive",
         action="store_true",
         help="Force interactive mode (prompt for everything)",
+    )
+
+    # VCS behavior group (mutually exclusive with mode)
+    vcs_group = parser.add_mutually_exclusive_group()
+    vcs_group.add_argument(
+        "--darcs-auto",
+        action="store_true",
+        help="Initialize darcs if available (default)",
+    )
+    vcs_group.add_argument(
+        "--darcs-skip",
+        action="store_true",
+        help="Skip darcs initialization",
+    )
+
+    # Tracking behavior group (mutually exclusive with mode)
+    tracking_group = parser.add_mutually_exclusive_group()
+    tracking_group.add_argument(
+        "--tracking-ignore",
+        action="store_true",
+        help="Add ai-context/ to .gitignore",
+    )
+    tracking_group.add_argument(
+        "--tracking-track",
+        action="store_true",
+        help="Track ai-context/ in parent git (no .gitignore)",
+    )
+    tracking_group.add_argument(
+        "--tracking-prompt",
+        action="store_true",
+        help="Prompt for .gitignore modification",
+    )
+
+    # Convenience flags (mutually exclusive with each other and above groups)
+    convenience_group = parser.add_mutually_exclusive_group()
+    convenience_group.add_argument(
+        "--shared",
+        action="store_true",
+        help="Track in parent git, no darcs (for team workflows)",
+    )
+    convenience_group.add_argument(
+        "--standalone",
+        action="store_true",
+        help="Use darcs if avail, ignore in git (local-only)",
     )
 
     # Special actions group (mutually exclusive with mode)
@@ -249,6 +293,44 @@ def resolve_gitignore_behavior(args) -> str:
         return "prompt"
     elif args.auto:
         return "skip"
+    elif args.interactive:
+        return "prompt"
+    else:
+        # Default based on interactivity
+        return "prompt" if INTERACTIVE else "skip"
+
+
+def resolve_darcs_behavior(args) -> str:
+    """Resolve darcs behavior based on flags."""
+    if args.darcs_skip:
+        return "skip"
+    elif args.darcs_auto:
+        return "auto"
+    elif args.shared:
+        return "skip"
+    elif args.standalone:
+        return "auto"
+    elif args.auto:
+        return "auto"
+    else:
+        # Default: try darcs if available
+        return "auto"
+
+
+def resolve_tracking_behavior(args) -> str:
+    """Resolve tracking behavior based on flags."""
+    if args.tracking_ignore:
+        return "ignore"
+    elif args.tracking_track:
+        return "track"
+    elif args.tracking_prompt:
+        return "prompt"
+    elif args.shared:
+        return "track"
+    elif args.standalone:
+        return "ignore"
+    elif args.auto:
+        return "prompt"
     elif args.interactive:
         return "prompt"
     else:
@@ -707,28 +789,29 @@ def init_darcs(ai_context: pathlib.Path) -> None:
 # ──────────────────────────────────────────────────────────────────────
 
 
-def handle_gitignore(
+def handle_tracking(
     target: pathlib.Path,
-    gitignore_behavior: str,
+    tracking_behavior: str,
 ) -> None:
-    """Handle .gitignore modification based on behavior."""
+    """Handle tracking behavior: ignore in .gitignore or track in parent git."""
     gitignore_path = target / ".gitignore"
     entry = "ai-context/"
 
-    # Check if already ignored
-    already_ignored = False
-    if gitignore_path.exists():
-        content = gitignore_path.read_text()
-        if entry in content.splitlines():
-            already_ignored = True
-
-    if already_ignored:
-        print("ai-context/ is already in .gitignore.")
+    if tracking_behavior == "track":
+        print("ai-context/ will be tracked in parent git (not ignored).")
         return
 
-    print("")
+    if tracking_behavior == "ignore":
+        already_ignored = False
+        if gitignore_path.exists():
+            content = gitignore_path.read_text()
+            if entry in content.splitlines():
+                already_ignored = True
 
-    if gitignore_behavior == "auto":
+        if already_ignored:
+            print("ai-context/ is already in .gitignore.")
+            return
+
         if not gitignore_path.exists():
             gitignore_path.write_text(entry + "\n")
         else:
@@ -736,23 +819,30 @@ def handle_gitignore(
                 f.write(entry + "\n")
         print("Added 'ai-context/' to .gitignore")
 
-    elif gitignore_behavior == "skip":
-        print("Skipped .gitignore update.")
-
-    elif gitignore_behavior == "prompt":
+    elif tracking_behavior == "prompt":
         if INTERACTIVE:
             answer = input("Add ai-context/ to .gitignore? [Y/n] ").strip().lower()
             if answer in ("", "y", "yes"):
-                if not gitignore_path.exists():
-                    gitignore_path.write_text(entry + "\n")
-                else:
-                    with gitignore_path.open("a") as f:
-                        f.write(entry + "\n")
+                already_ignored = False
+                if gitignore_path.exists():
+                    content = gitignore_path.read_text()
+                    if entry in content.splitlines():
+                        already_ignored = True
+
+                if not already_ignored:
+                    if not gitignore_path.exists():
+                        gitignore_path.write_text(entry + "\n")
+                    else:
+                        with gitignore_path.open("a") as f:
+                            f.write(entry + "\n")
                 print("Added 'ai-context/' to .gitignore")
             else:
                 print("Skipped .gitignore update.")
         else:
             print("Skipped .gitignore update (non-interactive mode).")
+
+    elif tracking_behavior == "skip":
+        print("Skipped .gitignore update.")
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -936,14 +1026,40 @@ def print_summary(
 
 
 # ──────────────────────────────────────────────────────────────────────
+def validate_flag_combinations(args) -> None:
+    """Validate incompatible flag combinations across groups.
+
+    Raises:
+        SystemExit: With code 2 if incompatible flags are used together.
+    """
+    # --shared conflicts with --darcs-* and --tracking-*
+    if args.shared and (args.darcs_auto or args.darcs_skip):
+        parser.error("--shared not allowed with --darcs-* arguments")
+    if args.shared and (args.tracking_ignore or args.tracking_track or args.tracking_prompt):
+        parser.error("--shared not allowed with --tracking-* arguments")
+
+    # --standalone conflicts with --darcs-* and --tracking-*
+    if args.standalone and (args.darcs_auto or args.darcs_skip):
+        parser.error("--standalone not allowed with --darcs-* arguments")
+    if args.standalone and (args.tracking_ignore or args.tracking_track or args.tracking_prompt):
+        parser.error("--standalone not allowed with --tracking-* arguments")
+
+    # --auto conflicts with --interactive
+    if args.auto and args.interactive:
+        parser.error("--auto not allowed with --interactive")
+
+
 # Main
 # ──────────────────────────────────────────────────────────────────────
 
-
 def main() -> None:
     """Main entry point."""
+    global parser
     parser = create_parser()
     args = parser.parse_args()
+
+    # Validate flag combinations
+    validate_flag_combinations(args)
 
     # Handle special actions
     if args.print_prompt:
@@ -955,7 +1071,8 @@ def main() -> None:
 
     # Resolve behaviors
     skills_behavior = resolve_skills_behavior(args)
-    gitignore_behavior = resolve_gitignore_behavior(args)
+    darcs_behavior = resolve_darcs_behavior(args)
+    tracking_behavior = resolve_tracking_behavior(args)
 
     # Create directory structure
     ai_context = create_directory_structure(target)
@@ -989,11 +1106,14 @@ def main() -> None:
     collisions.extend(wf_collisions)
     partial_success = partial_success or wf_partial
 
-    # Initialize darcs
-    init_darcs(ai_context)
+    # Initialize darcs based on behavior
+    if darcs_behavior == "auto":
+        init_darcs(ai_context)
+    elif darcs_behavior == "skip":
+        pass  # Skip darcs as requested
 
-    # Handle gitignore
-    handle_gitignore(target, gitignore_behavior)
+    # Handle tracking (gitignore or track in parent git)
+    handle_tracking(target, tracking_behavior)
 
     # Print summary
     print_summary(ai_context, args.java, linked_count, skipped_count, collisions)
