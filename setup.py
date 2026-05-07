@@ -735,6 +735,107 @@ def link_skills_to_windsurf(
     return linked_count, skipped_count, collisions, partial_success
 
 
+def link_skills_to_codex(
+    target: pathlib.Path,
+    ai_context: pathlib.Path,
+    skills_behavior: str,
+) -> Tuple[int, int, List[str], bool]:
+    """Link skills from ai-context/skills to .agents/skills.
+
+    Returns:
+        Tuple of (linked_count, skipped_count, collision_names, partial_success)
+    """
+    print("Linking skills to .agents directory...")
+
+    codex_dir = target / ".agents"
+    codex_skills = codex_dir / "skills"
+    source_skills = ai_context / "skills"
+
+    linked_count = 0
+    skipped_count = 0
+    collisions = []
+    partial_success = False
+
+    if not codex_dir.exists():
+        codex_dir.mkdir(parents=True, exist_ok=True)
+        print("  Created .agents directory")
+
+    if not codex_skills.exists():
+        codex_skills.mkdir(parents=True, exist_ok=True)
+        print("  Created .agents/skills directory")
+
+    if source_skills.exists():
+        for skill_dir in sorted(source_skills.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+
+            skill_name = skill_dir.name
+            target_link = codex_skills / skill_name
+
+            if target_link.exists() or target_link.is_symlink():
+                print(f"  Collision detected: {skill_name} already exists in .agents/skills/")
+
+                if skills_behavior == "overwrite":
+                    if target_link.is_symlink():
+                        target_link.unlink()
+                    else:
+                        shutil.rmtree(target_link)
+                    target_link.symlink_to(skill_dir)
+                    print(f"    Overwrote {skill_name}")
+                    linked_count += 1
+
+                elif skills_behavior == "skip":
+                    print(f"    Skipped {skill_name}")
+                    skipped_count += 1
+                    collisions.append(skill_name)
+                    partial_success = True
+
+                elif skills_behavior == "backup":
+                    backup_dir = create_backup(target_link, target_link)
+                    print(f"    Backed up {skill_name} to {backup_dir.name}")
+                    if target_link.is_symlink():
+                        target_link.unlink()
+                    else:
+                        shutil.rmtree(target_link)
+                    target_link.symlink_to(skill_dir)
+                    print(f"    Overwrote {skill_name} (backup created)")
+                    linked_count += 1
+
+                elif skills_behavior == "prompt":
+                    if INTERACTIVE:
+                        answer = (
+                            input(f"  Overwrite {skill_name}? [y/N] ").strip().lower()
+                        )
+                        if answer in ("y", "yes"):
+                            if target_link.is_symlink():
+                                target_link.unlink()
+                            else:
+                                shutil.rmtree(target_link)
+                            target_link.symlink_to(skill_dir)
+                            print(f"    Overwrote {skill_name}")
+                            linked_count += 1
+                        else:
+                            print(f"    Skipped {skill_name}")
+                            skipped_count += 1
+                            collisions.append(skill_name)
+                            partial_success = True
+                    else:
+                        print(f"    Skipping {skill_name} (non-interactive mode)")
+                        skipped_count += 1
+                        collisions.append(skill_name)
+                        partial_success = True
+            else:
+                target_link.symlink_to(skill_dir)
+                print(f"  Linked {skill_name}")
+                linked_count += 1
+
+    print(
+        f"  Codex linking complete: {linked_count} linked, {skipped_count} skipped"
+    )
+
+    return linked_count, skipped_count, collisions, partial_success
+
+
 # ──────────────────────────────────────────────────────────────────────
 # Darcs and Git Integration
 # ──────────────────────────────────────────────────────────────────────
@@ -1005,6 +1106,10 @@ def print_summary(
     print(" .claude/skills:")
     print("   Linked as directories to ai-context/skills/")
     print("   Claude Code integration")
+    print("")
+    print(" .agents/skills:")
+    print("   Linked as directories to ai-context/skills/")
+    print("   Codex integration")
     if linked_count > 0:
         print(f"   Total: {linked_count} skill(s) linked successfully")
     if skipped_count > 0:
@@ -1105,6 +1210,17 @@ def main() -> None:
     skipped_count += wf_skipped
     collisions.extend(wf_collisions)
     partial_success = partial_success or wf_partial
+
+    # Link skills to .agents directory (Codex)
+    codex_linked, codex_skipped, codex_collisions, codex_partial = link_skills_to_codex(
+        target,
+        ai_context,
+        skills_behavior,
+    )
+    linked_count += codex_linked
+    skipped_count += codex_skipped
+    collisions.extend(codex_collisions)
+    partial_success = partial_success or codex_partial
 
     # Initialize darcs based on behavior
     if darcs_behavior == "auto":

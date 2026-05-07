@@ -460,5 +460,83 @@ class SetupScriptTests(unittest.TestCase):
         self.assertIn("ai-context/", content)
 
 
+# ──────────────────────────────────────────────────────────────────────
+    # Test 18: Codex .agents/skills/ directory created
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_18_codex_skills_directory_created(self):
+        """Test that .agents/skills/ directory is created with symlinks."""
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        # Check that .agents/skills/ directory exists
+        codex_skills = Path(self.test_dir) / ".agents" / "skills"
+        self.assertTrue(codex_skills.exists(), ".agents/skills/ directory not created")
+
+        # Check that at least one skill symlink exists
+        skill_dirs = list(codex_skills.iterdir())
+        self.assertGreater(len(skill_dirs), 0, "No skills linked in .agents/skills/")
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 19: Codex skills are symlinks to ai-context/skills/
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_19_codex_skills_are_symlinks(self):
+        """Test that Codex skills are symlinks pointing to ai-context/skills/."""
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        codex_skills = Path(self.test_dir) / ".agents" / "skills"
+        ai_context_skills = Path(self.test_dir) / "ai-context" / "skills"
+
+        # Check that each skill in .agents/skills/ is a symlink to ai-context/skills/
+        for skill_dir in codex_skills.iterdir():
+            self.assertTrue(skill_dir.is_symlink(), f"{skill_dir.name} is not a symlink")
+            self.assertEqual(
+                skill_dir.resolve().parent,
+                ai_context_skills.resolve(),
+                f"{skill_dir.name} doesn't point to ai-context/skills/"
+            )
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 20: Codex collision handling with --skills-skip
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_20_codex_collision_handling_skip(self):
+        """Test Codex collision handling with --skills-skip returns exit code 1."""
+        # Pre-create ai-context with skills first
+        ai_context = Path(self.test_dir) / "ai-context"
+        ai_context.mkdir(parents=True, exist_ok=True)
+
+        src_skills = self.script_dir / "core" / "skills"
+        if src_skills.exists():
+            dst_skills = ai_context / "skills"
+            shutil.copytree(src_skills, dst_skills)
+
+        # Pre-create the .agents/skills collision
+        codex_skills = Path(self.test_dir) / ".agents" / "skills"
+        codex_skills.mkdir(parents=True, exist_ok=True)
+
+        # Create a collision by pre-creating one of the skill directories
+        ai_context_skills = ai_context / "skills"
+        if ai_context_skills.exists():
+            for skill in ai_context_skills.iterdir():
+                if skill.is_dir():
+                    collision_target = codex_skills / skill.name
+                    collision_target.mkdir(parents=True, exist_ok=True)
+                    (collision_target / "dummy.txt").write_text("existing content")
+                    break
+
+        # Remove ai-context to let setup.py run fresh
+        shutil.rmtree(ai_context)
+
+        # Run setup.py with --skills-skip
+        exit_code, stdout, stderr = self.run_setup(None, "--skills-skip")
+        self.assertEqual(exit_code, 1, f"Expected exit 1, got {exit_code}")
+        self.assertIn("Collision detected", stdout)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
