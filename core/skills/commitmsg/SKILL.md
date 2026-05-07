@@ -1,3 +1,9 @@
+---
+name: commitmsg
+description: Smart Commit Message Generation
+compatibility: opencode
+---
+
 # `/commitmsg` - Smart Commit Message Generation
 
 Generate commit messages that cover the **full scope** of work across related sessions, not just the last edit.

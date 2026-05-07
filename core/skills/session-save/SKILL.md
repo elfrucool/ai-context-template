@@ -1,3 +1,9 @@
+---
+name: session-save
+description: Automated Session Summaries
+compatibility: opencode
+---
+
 # `/session-save` - Automated Session Summaries
 
 Automate end-of-session documentation following the standard template, eliminating repeated format explanations.

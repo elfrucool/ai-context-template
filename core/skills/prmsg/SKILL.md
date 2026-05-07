@@ -1,3 +1,9 @@
+---
+name: prmsg
+description: Smart PR Description Generation
+compatibility: opencode
+---
+
 # `/prmsg` - PR Description Generation
 
 Generate PR descriptions that include **full context** from multi-session work, following the repository's PR template format.

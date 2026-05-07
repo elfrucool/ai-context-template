@@ -836,52 +836,6 @@ def link_skills_to_codex(
     return linked_count, skipped_count, collisions, partial_success
 
 
-def add_opencode_frontmatter(skill_md_path: pathlib.Path) -> bool:
-    """Add OpenCode frontmatter to a skill file if not present.
-
-    Returns:
-        True if frontmatter was added, False if already present or file doesn't exist.
-    """
-    if not skill_md_path.exists():
-        return False
-
-    content = skill_md_path.read_text()
-
-    if content.startswith("---"):
-        return False
-
-    skill_name = skill_md_path.parent.name
-    description = _extract_skill_description(content)
-
-    frontmatter = f"""---
-name: {skill_name}
-description: {description}
-compatibility: opencode
----
-
-"""
-    new_content = frontmatter + content
-    skill_md_path.write_text(new_content)
-    return True
-
-
-def _extract_skill_description(skill_content: str) -> str:
-    """Extract a description from skill content for OpenCode frontmatter."""
-    lines = skill_content.strip().split("\n")
-    for line in lines:
-        line = line.strip()
-        if line.startswith("# `/"):
-            rest = line.replace("# `/", "").replace("` - ", " - ").replace("`", "")
-            if " - " in rest:
-                return rest.split(" - ", 1)[1].strip()
-        elif line.startswith("# /"):
-            rest = line.replace("# /", "").strip()
-            if " - " in rest:
-                return rest.split(" - ", 1)[1].strip()
-
-    return "Custom skill for this project"
-
-
 def link_skills_to_opencode(
     target: pathlib.Path,
     ai_context: pathlib.Path,
@@ -923,10 +877,6 @@ def link_skills_to_opencode(
             if not skill_md.exists():
                 print(f"  Warning: {skill_name}/SKILL.md not found, skipping")
                 continue
-
-            was_added = add_opencode_frontmatter(skill_md)
-            if was_added:
-                print(f"  Added OpenCode frontmatter to {skill_name}")
 
             if target_link.exists() or target_link.is_symlink():
                 print(f"  Collision detected: {skill_name} already exists in .opencode/skills/")
