@@ -26,6 +26,7 @@ The description is split across two fields in the GitHub web form:
 
 ```markdown
 ## Summary
+
 [PROJ-xxx](https://TODO-YOUR-JIRA-INSTANCE.atlassian.net/browse/PROJ-xxx)
 
 One or two paragraphs explaining **what** changed and **why**. Include context

@@ -43,6 +43,7 @@ Before planning, ensure requirements are clear:
 - **Don't proceed** with unclear requirements - ask first
 
 **Questions to consider:**
+
 - What is the expected behavior?
 - What inputs/outputs are involved?
 - Are there edge cases to handle?
@@ -52,12 +53,12 @@ Before planning, ensure requirements are clear:
 
 Define clear boundaries:
 
-| Aspect | Include |
-|--------|---------|
-| **In scope** | What this task will accomplish |
-| **Out of scope** | What this task will NOT do |
-| **Assumptions** | What we're taking as given |
-| **Complexity** | Simple / Medium / Complex |
+| Aspect           | Include                        |
+| ---------------- | ------------------------------ |
+| **In scope**     | What this task will accomplish |
+| **Out of scope** | What this task will NOT do     |
+| **Assumptions**  | What we're taking as given     |
+| **Complexity**   | Simple / Medium / Complex      |
 
 ### Phase 4: Plan Creation
 
@@ -66,6 +67,7 @@ For **complex tasks**, create a plan file before implementation.
 **File location**: `ai-context/sessions/YYYY-MM-DD-XX-<topic>-plan.md`
 
 **Plan structure**:
+
 ```markdown
 # <Task Title> - Plan
 
@@ -73,21 +75,26 @@ For **complex tasks**, create a plan file before implementation.
 **Status**: Draft / Approved / In Progress
 
 ## Goal
+
 What we're trying to achieve
 
 ## Findings
+
 What we learned during exploration
 
 ## Phases
+
 1. Phase 1: ...
 2. Phase 2: ...
 3. Phase 3: ...
 
 ## Success Criteria
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 
 ## Open Questions (if any)
+
 - Question 1
 - Question 2
 ```
@@ -99,6 +106,7 @@ What we learned during exploration
 ### Checkpoint Guidance
 
 **Stop and ask when:**
+
 - Requirements are ambiguous
 - Multiple valid approaches exist
 - Changes would affect public APIs
@@ -106,6 +114,7 @@ What we learned during exploration
 - You're unsure about design decisions
 
 **Proceed when:**
+
 - Requirements are clear
 - Following established patterns
 - Changes are localized and low-risk
@@ -152,6 +161,7 @@ Implementation follows guidelines defined in language-specific files in `guideli
 ### When to Create
 
 Create a session summary when:
+
 - Significant work completed (refactoring, feature, architecture)
 - Major decisions made that affect future work
 - Work paused mid-task and context needs preservation
@@ -171,6 +181,7 @@ Partial summaries are acceptable if the user needs to leave mid-session.
 If a plan file exists, use the **same XX number** for the implementation summary.
 
 **Examples:**
+
 - `2026-01-28-00-compiler-refactoring-plan.md` (plan)
 - `2026-01-28-00-compiler-refactoring.md` (implementation summary)
 - `2026-01-28-01-test-data-cleanup.md` (separate task)
@@ -184,25 +195,32 @@ If a plan file exists, use the **same XX number** for the implementation summary
 **Status**: Completed / In Progress / Paused
 
 ## Overview
+
 Brief description of what was done (2-3 sentences)
 
 ## Key Decisions
+
 - **Decision 1**: Reasoning behind it
 - **Decision 2**: Reasoning behind it
 
 ## Technical Details
+
 (Optional - include when helpful for future reference)
+
 - Code patterns introduced
 - Architecture notes
 - Important file locations
 
 ## Current State
+
 - What's working
 - What's been tested
 - What's pending (if any)
 
 ## Follow-up / TODO
+
 (If work is incomplete or follow-up tasks identified)
+
 - [ ] Task 1
 - [ ] Task 2
 ```
@@ -213,42 +231,43 @@ Brief description of what was done (2-3 sentences)
 
 ### When to Create a Plan File
 
-| Situation | Create Plan? |
-|-----------|--------------|
-| Simple bug fix, clear requirements | No |
-| Multi-file refactoring | Yes |
-| New feature with design choices | Yes |
-| Following established pattern exactly | No |
-| Architectural changes | Yes |
-| User explicitly requests a plan | Yes |
+| Situation                             | Create Plan? |
+| ------------------------------------- | ------------ |
+| Simple bug fix, clear requirements    | No           |
+| Multi-file refactoring                | Yes          |
+| New feature with design choices       | Yes          |
+| Following established pattern exactly | No           |
+| Architectural changes                 | Yes          |
+| User explicitly requests a plan       | Yes          |
 
 ### When to Ask vs. Proceed
 
-| Situation | Action |
-|-----------|--------|
-| Multiple valid implementation approaches | Ask |
-| Unclear requirements | Ask |
-| Need to change method visibility | Ask |
-| Following exact pattern from guidelines | Proceed |
-| Simple, localized change | Proceed |
-| User already approved approach | Proceed |
+| Situation                                | Action  |
+| ---------------------------------------- | ------- |
+| Multiple valid implementation approaches | Ask     |
+| Unclear requirements                     | Ask     |
+| Need to change method visibility         | Ask     |
+| Following exact pattern from guidelines  | Proceed |
+| Simple, localized change                 | Proceed |
+| User already approved approach           | Proceed |
 
 ### When to Suggest Session Summary
 
-| Situation | Suggest Summary? |
-|-----------|------------------|
-| Completed significant feature | Yes |
-| Made important architectural decisions | Yes |
-| Multiple files changed | Yes |
-| Quick one-file fix | No |
-| Work interrupted mid-task | Yes (partial) |
-| Research/exploration only | No |
+| Situation                              | Suggest Summary? |
+| -------------------------------------- | ---------------- |
+| Completed significant feature          | Yes              |
+| Made important architectural decisions | Yes              |
+| Multiple files changed                 | Yes              |
+| Quick one-file fix                     | No               |
+| Work interrupted mid-task              | Yes (partial)    |
+| Research/exploration only              | No               |
 
 ---
 
 ## Summary Checklist
 
 **Before starting:**
+
 - [ ] Read recent session files for context
 - [ ] Understand the codebase area being modified
 - [ ] Clarify any ambiguous requirements
@@ -257,12 +276,14 @@ Brief description of what was done (2-3 sentences)
 - [ ] Get user approval for approach
 
 **During implementation:**
+
 - [ ] Work incrementally (one test at a time)
 - [ ] Let user run tests unless asked otherwise
 - [ ] Ask before making accessibility changes
 - [ ] Stay within defined scope
 
 **After completing:**
+
 - [ ] Ask user if they want a session summary
 - [ ] Document key decisions and reasoning
 - [ ] Note any follow-up tasks identified

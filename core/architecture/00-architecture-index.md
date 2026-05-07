@@ -5,8 +5,8 @@ These documents change infrequently and serve as authoritative sources.
 
 ## Architecture Documents
 
-| Document | Purpose |
-|----------|---------|
+| Document                                       | Purpose                                                |
+| ---------------------------------------------- | ------------------------------------------------------ |
 | [Domain Explanation](01-domain-explanation.md) | Core concepts & terminology — fill in for your project |
 
 ## Quick Reference

@@ -1,11 +1,13 @@
 # Java Unit Testing Guidelines
 
 ## Overview
+
 These guidelines define how to write JUnit 5 unit tests for Java code. Follow these principles to create maintainable, clear, and effective test suites.
 
 ## Core Principles
 
 ### 1. Incremental Test Development
+
 - **Start small**: Begin with the simplest test case, not the entire test suite
 - **One test at a time**: Write one complete test before moving to the next
 - **One scenario at a time**: Don't try to cover all scenarios in the first iteration
@@ -24,29 +26,34 @@ These guidelines define how to write JUnit 5 unit tests for Java code. Follow th
 Ok, there could be exceptions, but when you find that the method under test is not accessible, then ask me. Or if you find yourself thinking "if only this method/field were accessible", then ask me.
 
 **When to Mock**:
+
 - External services (APIs, databases, file systems)
 - Third-party libraries
 - Network calls
 - Time-dependent operations (clocks, timers)
 
 **When NOT to Mock**:
+
 - Private or protected methods within the same class
 - Internal business logic
 - Data transformation methods
 
 **Alternative Approaches for Internal Methods**:
+
 1. **Make methods more accessible** - Change `private` to `protected` or package-private for testing
 2. **Extract to separate classes** - Move complex logic to dedicated service classes
 3. **Use static methods** - Reduce dependencies and make testing easier
 4. **Test through public interface** - Test the behavior indirectly through public methods
 
 **Benefits**:
+
 - Cleaner, more focused tests
 - Less brittle test setup
 - Better test coverage of actual implementation
 - Easier maintenance and refactoring
 
 **Example**:
+
 ```java
 // Instead of mocking private method:
 @Mock private Service service;
@@ -58,7 +65,9 @@ assertThat(result).isEqualTo(expected);
 ```
 
 ### 3. Test Progression Order
+
 Test cases should progress from simple to complex:
+
 1. **Early exits first**: Test quick validation failures, null checks, empty inputs
 2. **Happy path**: Test the standard successful case
 3. **Edge cases**: Test boundary conditions
@@ -371,6 +380,7 @@ void testUserRecord() {
 ### Start Simple
 
 **First test** - Early exit case:
+
 ```java
 @Test
 @DisplayName("returns empty when input is null")
@@ -384,6 +394,7 @@ void testNullInput() {
 ```
 
 **Second test** - Happy path:
+
 ```java
 @Test
 @DisplayName("processes valid data successfully")
@@ -403,6 +414,7 @@ void testValidData() {
 ### Incremental Complexity
 
 Don't write this all at once:
+
 ```java
 // DON'T: Try to build everything in first iteration
 @Nested
@@ -416,6 +428,7 @@ class ProcessPaymentScenarios {
 ```
 
 Instead, build step by step:
+
 ```java
 // Iteration 1: Start with simplest case
 @Nested

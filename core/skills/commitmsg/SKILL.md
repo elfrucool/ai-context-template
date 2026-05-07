@@ -7,10 +7,12 @@ Generate commit messages that cover the **full scope** of work across related se
 ## Mode Requirements
 
 **For Windsurf Cascade Agent**:
+
 - If you are in Ask mode, stop and ask the user to switch to Code mode
 - This skill requires git commands and file operations that are only available in Code mode
 
 **For Claude CLI**:
+
 - No special indication is required, Claude CLI knows how to require the user to authorize commands and modifications
 
 ### Default Behavior (Smart Git-Based Scope Detection)
@@ -135,6 +137,7 @@ Claude:
 
 Output:
 ```
+
 Add user authentication with JWT tokens
 
 Implement JWT-based authentication to replace the previous
@@ -142,12 +145,14 @@ session-based approach. This change improves security and enables
 stateless authentication for API endpoints.
 
 Changes include:
+
 - New AuthService with token generation and validation
 - Middleware for protected routes
 - Updated user login endpoint to return JWT
 - Added token refresh mechanism
 
 Signed-off-by: John Doe <john@example.com>
+
 ```
 ```
 

@@ -1,11 +1,13 @@
 # Test Data Creation Guidelines
 
 ## Overview
+
 This guide explains how to create reusable, maintainable test data structures for complex scenarios using records, builders, and functional-style immutable modifications.
 
 ## When to Create Test Data Structures
 
 ### Use inline data when:
+
 - Data is simple (1-3 primitive fields)
 - Used only once in a single test
 - Clarity is not compromised
@@ -21,6 +23,7 @@ void testSimpleOrder() {
 ```
 
 ### Create test data structures when:
+
 - Same data structure used across multiple tests
 - Object has many fields (4+)
 - Need different variations of similar data

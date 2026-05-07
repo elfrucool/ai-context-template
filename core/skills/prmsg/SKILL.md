@@ -7,10 +7,12 @@ Generate PR descriptions that include **full context** from multi-session work, 
 ## Mode Requirements
 
 **For Windsurf Cascade Agent**:
+
 - If you are in Ask mode, stop and ask the user to switch to Code mode
 - This skill requires git commands and file operations that are only available in Code mode
 
 **For Claude CLI**:
+
 - No special indication is required, Claude CLI knows how to require the user to authorize commands and modifications
 
 ### Step 1: Ask for JIRA Ticket (Required)
@@ -47,6 +49,7 @@ The PR description follows `guidelines/PR_DESCRIPTION_GUIDELINES.md`:
 ### Title Field (separate)
 
 Short imperative sentence describing the change:
+
 - Example: `Fix user authentication for SSO login`
 - Corresponds to the `#` heading in the draft
 
@@ -54,6 +57,7 @@ Short imperative sentence describing the change:
 
 ```markdown
 ## Summary
+
 [PROJ-xxx](https://your-jira-instance.atlassian.net/browse/PROJ-xxx)
 
 One or two paragraphs explaining **what** changed and **why**. Include context
@@ -143,6 +147,7 @@ PR descriptions should be saved as session files:
 `ai-context/sessions/YYYY-MM-DD-XX-<topic>-PR.md`
 
 The file uses:
+
 - `#` for the title (what goes in the title field)
 - `##` for the body sections (Summary, Test Plan)
 
@@ -152,7 +157,7 @@ The file uses:
 
 ### Example 1: With JIRA ticket
 
-```
+````
 User: /prmsg
 
 Claude: Is there a JIRA ticket for this work?
@@ -196,12 +201,12 @@ authentication.
 - ✓ Integration tests for protected endpoints
 - ✓ Performance testing shows <500ms login time
 - Load testing with 100 concurrent users
-```
-```
+````
 
+```
 ### Example 2: Without JIRA ticket
-
 ```
+
 User: /prmsg
 
 Claude: Is there a JIRA ticket for this work?
@@ -213,6 +218,7 @@ Claude:
 **Title**: Add user authentication with JWT tokens
 
 **Body**:
+
 ```markdown
 ## Summary
 
@@ -224,13 +230,13 @@ stateless authentication for API endpoints.
 
 - **AuthService** — new service with JWT token generation and validation
 - **Protected route middleware** — validates JWT tokens for API endpoints
-(... rest of description)
-```
+  (... rest of description)
 ```
 
+```
 ### Example 3: With time override
-
 ```
+
 User: /prmsg args: "since yesterday"
 
 Claude: Is there a JIRA ticket for this work?
@@ -238,8 +244,8 @@ User: No, this is just a quick fix
 
 Claude:
 (Reads only yesterday's session files, generates focused PR description)
-```
 
+```
 ## Tips
 
 - The skill automatically handles multi-session work — reads relevant session files to understand full context
@@ -252,3 +258,4 @@ Claude:
 - PR description format: `guidelines/PR_DESCRIPTION_GUIDELINES.md` (full file)
 - Session file structure: `guidelines/DEVELOPMENT_PROCESS.md` lines 164-207
 - Commit message format (for merge commits): `CLAUDE.md` lines 81-92
+```

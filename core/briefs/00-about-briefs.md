@@ -3,9 +3,9 @@
 High-level summaries of major features and changes. Read a brief first to get oriented,
 then dive into `sessions/` only if you need implementation-level detail.
 
-| Brief | Period | Description |
-|-------|--------|-------------|
-| _(no briefs yet — create one after your first major feature)_ | | |
+| Brief                                                         | Period | Description |
+| ------------------------------------------------------------- | ------ | ----------- |
+| _(no briefs yet — create one after your first major feature)_ |        |             |
 
 ## When to create a brief
 

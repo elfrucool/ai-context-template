@@ -12,13 +12,13 @@ They serve as entry points before diving into implementation-level session notes
 
 ## When to Create a Brief
 
-| Situation | Create Brief? | Scope |
-|-----------|---------------|-------|
-| Single session, small fix | No | — |
-| Feature spanning 3+ session files | Yes | Multi-session work |
-| Significant architectural change | Yes | System-wide impact |
-| Before handing off work | Yes | Any substantial feature |
-| Major decision affecting future work | Yes | Design impact |
+| Situation                            | Create Brief? | Scope                   |
+| ------------------------------------ | ------------- | ----------------------- |
+| Single session, small fix            | No            | —                       |
+| Feature spanning 3+ session files    | Yes           | Multi-session work      |
+| Significant architectural change     | Yes           | System-wide impact      |
+| Before handing off work              | Yes           | Any substantial feature |
+| Major decision affecting future work | Yes           | Design impact           |
 
 **Note**: Small (1-2 session) features don't need briefs; large features do.
 
@@ -133,23 +133,23 @@ Entries should be in reverse chronological order (newest first).
 
 ## Brief vs. Session File
 
-| Aspect | Brief | Session |
-|--------|-------|---------|
-| **Purpose** | Orientation for new readers | Daily progress record |
-| **Audience** | New team members, architects | Current session participants |
-| **Scope** | Multi-session feature or architecture | Single session's work |
-| **Links** | Links to sessions | Inline details |
-| **Frequency** | Written once per major feature | Written daily during work |
-| **Update Pattern** | Stable; updated with major changes | Not updated after creation |
+| Aspect             | Brief                                 | Session                      |
+| ------------------ | ------------------------------------- | ---------------------------- |
+| **Purpose**        | Orientation for new readers           | Daily progress record        |
+| **Audience**       | New team members, architects          | Current session participants |
+| **Scope**          | Multi-session feature or architecture | Single session's work        |
+| **Links**          | Links to sessions                     | Inline details               |
+| **Frequency**      | Written once per major feature        | Written daily during work    |
+| **Update Pattern** | Stable; updated with major changes    | Not updated after creation   |
 
 ## Brief vs. Architecture Doc
 
-| Aspect | Brief | Architecture |
-|--------|-------|--------------|
-| **Purpose** | Feature overview and history | Reference design |
-| **Content** | What was built, why, timeline | How it works, design patterns |
-| **Links** | Links to code and sessions | Links to implementations |
-| **Frequency** | Rare (per major feature) | Infrequent (per system redesign) |
+| Aspect        | Brief                         | Architecture                     |
+| ------------- | ----------------------------- | -------------------------------- |
+| **Purpose**   | Feature overview and history  | Reference design                 |
+| **Content**   | What was built, why, timeline | How it works, design patterns    |
+| **Links**     | Links to code and sessions    | Links to implementations         |
+| **Frequency** | Rare (per major feature)      | Infrequent (per system redesign) |
 
 ## Examples
 

@@ -4,7 +4,7 @@ This directory contains context, guidelines, and session history for AI assistan
 
 ## Directory Structure
 
-````
+```
 ai-context
 ├── 0-index.md
 ├── CLAUDE.md
@@ -17,8 +17,7 @@ ai-context
 ├── sessions
 ├── til
 └── test-data
-````
-
+```
 
 ### `CLAUDE.md`
 
@@ -44,6 +43,7 @@ Stable coding standards and development processes. Read these before writing cod
 - `DEVELOPMENT_PROCESS.md` - End-to-end workflow (planning, implementation, summaries)
 - `BRIEF_CREATION_GUIDELINES.md` - When and how to create feature briefs
 - `PR_DESCRIPTION_GUIDELINES.md` - PR description structure, JIRA ticket conventions
+
 <!-- Add language-specific guidelines here when installed (e.g., JAVA_*.md) -->
 
 ### `sessions/`

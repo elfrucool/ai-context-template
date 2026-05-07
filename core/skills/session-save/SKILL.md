@@ -7,10 +7,12 @@ Automate end-of-session documentation following the standard template, eliminati
 ## Mode Requirements
 
 **For Windsurf Cascade Agent**:
+
 - If you are in Ask mode, stop and ask the user to switch to Code mode
 - This skill requires git commands and file operations that are only available in Code mode
 
 **For Claude CLI**:
+
 - No special indication is required, Claude CLI knows how to require the user to authorize commands and modifications
 
 ### Step 1: Auto-detect Date and Sequential Number
@@ -23,6 +25,7 @@ Automate end-of-session documentation following the standard template, eliminati
    - **Special case**: If a related plan file exists with the same base topic, use its XX number instead
 
 **Example**:
+
 - Existing: `2026-02-11-00-auth-refactoring-plan.md`
 - New implementation summary should be: `2026-02-11-00-auth-refactoring.md` (same XX)
 - Separate task: `2026-02-11-01-test-cleanup.md` (incremented XX)
@@ -57,25 +60,32 @@ Generate a summary following the template from `guidelines/DEVELOPMENT_PROCESS.m
 **Status**: Completed / In Progress / Paused
 
 ## Overview
+
 Brief description of what was done (2-3 sentences)
 
 ## Key Decisions
+
 - **Decision 1**: Reasoning behind it
 - **Decision 2**: Reasoning behind it
 
 ## Technical Details
+
 (Optional - include when helpful for future reference)
+
 - Code patterns introduced
 - Architecture notes
 - Important file locations
 
 ## Current State
+
 - What's working
 - What's been tested
 - What's pending (if any)
 
 ## Follow-up / TODO
+
 (If work is incomplete or follow-up tasks identified)
+
 - [ ] Task 1
 - [ ] Task 2
 ```
@@ -183,6 +193,7 @@ When invoked:
 ### Implementation Following a Plan
 
 If a plan file exists (e.g., `2026-02-11-00-auth-refactoring-plan.md`):
+
 - Use the **same XX number** for the implementation summary
 - File name: `2026-02-11-00-auth-refactoring.md` (no -plan suffix)
 - Reference the plan file in the Overview or Technical Details section
@@ -190,6 +201,7 @@ If a plan file exists (e.g., `2026-02-11-00-auth-refactoring-plan.md`):
 ### Multi-Session Work
 
 If this is session 02 or later for the same topic:
+
 - Increment the XX number (e.g., 00 → 01 → 02)
 - Read previous session files for continuity
 - In Overview, reference what was done in previous sessions
@@ -198,6 +210,7 @@ If this is session 02 or later for the same topic:
 ### Partial/Paused Sessions
 
 If the user needs to leave mid-session:
+
 - Set Status to "Paused"
 - In Current State, clearly mark what's pending
 - In Follow-up/TODO, list next steps
@@ -320,6 +333,7 @@ Claude: Session saved.
 From `DEVELOPMENT_PROCESS.md` lines 151-158:
 
 Create a session summary when:
+
 - Significant work completed (refactoring, feature, architecture)
 - Major decisions made that affect future work
 - Work paused mid-task and context needs preservation

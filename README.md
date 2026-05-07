@@ -17,6 +17,7 @@ python3 setup.py /path/to/your-project --java --tdd
 ```
 
 The script will:
+
 1. Create `ai-context/` with all core files and empty subdirectories
 2. Copy a `CLAUDE.md` stub to your project root (if none exists)
 3. Copy a `.windsurf/rules.md` stub (if none exists)
@@ -30,19 +31,19 @@ The script will:
 
 ### Core (always installed)
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Architecture principles, coding guidelines, commit conventions |
-| `0-index.md` | Directory guide — AI agents read this first |
-| `architecture/domain-explanation.md` | Template — fill in your project's domain concepts |
-| `guidelines/DEVELOPMENT_PROCESS.md` | Planning, implementation, and session summary workflow |
-| `guidelines/PR_DESCRIPTION_GUIDELINES.md` | PR description format with JIRA support |
-| `guidelines/SCRIPT_SECURITY_GUIDELINES.md` | Security review checklist — required before modifying/executing scripts |
-| `guidelines/BRIEF_CREATION_GUIDELINES.md` | Guidance on creating project briefs: timing, templates, quality checklist |
-| `scripts/move-context-files.py` | Move files between ai-context subdirectories and update references |
-| `scripts/migrate-filenames.py` | Rename session files to include sequential ordering numbers |
-| `skills/` | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries); linked to `.claude/skills/` and `.windsurf/workflows/` |
-| `til/` | "Today I Learned" entries — project-specific discoveries, patterns, and design decisions |
+| File                                       | Purpose                                                                                                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CLAUDE.md`                                | Architecture principles, coding guidelines, commit conventions                                                                                                           |
+| `0-index.md`                               | Directory guide — AI agents read this first                                                                                                                              |
+| `architecture/domain-explanation.md`       | Template — fill in your project's domain concepts                                                                                                                        |
+| `guidelines/DEVELOPMENT_PROCESS.md`        | Planning, implementation, and session summary workflow                                                                                                                   |
+| `guidelines/PR_DESCRIPTION_GUIDELINES.md`  | PR description format with JIRA support                                                                                                                                  |
+| `guidelines/SCRIPT_SECURITY_GUIDELINES.md` | Security review checklist — required before modifying/executing scripts                                                                                                  |
+| `guidelines/BRIEF_CREATION_GUIDELINES.md`  | Guidance on creating project briefs: timing, templates, quality checklist                                                                                                |
+| `scripts/move-context-files.py`            | Move files between ai-context subdirectories and update references                                                                                                       |
+| `scripts/migrate-filenames.py`             | Rename session files to include sequential ordering numbers                                                                                                              |
+| `skills/`                                  | Workflow skills: `/commitmsg` (commit messages), `/prmsg` (PR descriptions), `/session-save` (session summaries); linked to `.claude/skills/` and `.windsurf/workflows/` |
+| `til/`                                     | "Today I Learned" entries — project-specific discoveries, patterns, and design decisions                                                                                 |
 
 ### Modules (optional)
 
@@ -50,10 +51,10 @@ The script will:
 
 Installs Java-specific TDD guidelines:
 
-| File | Purpose |
-|------|---------|
-| `JAVA_UNIT_TESTING_GUIDELINES.md` | JUnit 5 test structure, incremental TDD, AssertJ, Mockito |
-| `JAVA_TEST_DATA_CREATION_GUIDELINES.md` | Records + builders pattern for test data |
+| File                                    | Purpose                                                   |
+| --------------------------------------- | --------------------------------------------------------- |
+| `JAVA_UNIT_TESTING_GUIDELINES.md`       | JUnit 5 test structure, incremental TDD, AssertJ, Mockito |
+| `JAVA_TEST_DATA_CREATION_GUIDELINES.md` | Records + builders pattern for test data                  |
 
 When installed, cross-references are automatically patched into `DEVELOPMENT_PROCESS.md`, `0-index.md`, and `CLAUDE.md`.
 
@@ -196,12 +197,14 @@ See [Context Engineering: A Complete Guide 2026](https://codeconductor.ai/blog/c
 ### When to Use This vs. Roll Your Own
 
 Use this template if you want:
+
 - A structured starting point for multiple projects
 - Opinions on AI-assisted development workflow
 - Integration with Claude Code and Windsurf
 - Automated skill linking and setup
 
 Roll your own if you:
+
 - Prefer minimal structure
 - Have deeply different IDE/tooling requirements
 - Want to build your own philosophy from scratch
