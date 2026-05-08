@@ -106,6 +106,8 @@ This project maintains detailed context in the `ai-context/` directory.
 
 **Important:** The `ai-context/` directory is exclusively for local AI agents. Do not reference it from the codebase (README, javadocs, code comments, etc.).
 
+**Symlink structure:** The root `CLAUDE.md`, `AGENTS.md`, and `.windsurf/rules.md` are symbolic links pointing to `ai-context/CLAUDE.md`. They are NOT separate files - editing any of them modifies the same file. Do not delete or replace these symlinks.
+
 **Start here:** Read `ai-context/0-index.md` for directory structure and guidance on which files to read for different tasks.
 
 **Quick reference:**

@@ -21,7 +21,9 @@ ai-context
 
 ### `CLAUDE.md`
 
-Project-wide instructions for AI agents: architecture principles, coding guidelines, commit message conventions, and quick-reference pointers into this directory. The root `CLAUDE.md` is a stub that redirects here.
+Project-wide instructions for AI agents: architecture principles, coding guidelines, commit message conventions, and quick-reference pointers into this directory.
+
+**Important:** The root `CLAUDE.md`, `AGENTS.md`, and `.windsurf/rules.md` are **symbolic links** pointing to `ai-context/CLAUDE.md`. They are NOT separate files - editing any of them modifies the same file.
 
 ### `architecture/`
 
