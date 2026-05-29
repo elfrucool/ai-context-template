@@ -117,50 +117,6 @@ your-project/
     └── archive/                       # Outdated files
 ```
 
-your-project/
-├── CLAUDE.md # Stub → ai-context/CLAUDE.md
-├── .windsurf/
-│ ├── rules.md # Stub → ai-context/CLAUDE.md
-│ └── workflows/
-│ ├── commitmsg.md # → ai-context/skills/commitmsg/SKILL.md
-│ ├── prmsg.md # → ai-context/skills/prmsg/SKILL.md
-│ └── session-save.md # → ai-context/skills/session-save/SKILL.md
-├── .claude/
-│ └── skills/
-│ ├── commitmsg/ # → ai-context/skills/commitmsg/
-│ ├── prmsg/ # → ai-context/skills/prmsg/
-│ └── session-save/ # → ai-context/skills/session-save/
-└── ai-context/
-├── 0-index.md
-├── CLAUDE.md
-├── architecture/
-│ ├── 00-architecture-index.md
-│ └── 01-domain-explanation.md
-├── briefs/
-│ └── 00-about-briefs.md
-├── guidelines/
-│ ├── DEVELOPMENT_PROCESS.md
-│ ├── PR_DESCRIPTION_GUIDELINES.md
-│ ├── SCRIPT_SECURITY_GUIDELINES.md
-│ └── BRIEF_CREATION_GUIDELINES.md
-├── scripts/
-│ ├── move-context-files.py
-│ └── migrate-filenames.py
-├── skills/
-│ ├── commitmsg/
-│ │ └── SKILL.md
-│ ├── prmsg/
-│ │ └── SKILL.md
-│ └── session-save/
-│ └── SKILL.md
-├── sessions/ # Session notes go here
-├── til/ # Today I Learned entries
-├── reference/ # API specs, schemas
-├── external/ # Context from other projects
-├── test-data/ # Test data files
-└── archive/ # Outdated files
-
-```
 ## Documentation Hierarchy
 
 The template uses a three-level hierarchy for project context:
