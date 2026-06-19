@@ -37,6 +37,15 @@ Generate commit messages that cover the **full scope** of work across related se
    - Analyze ALL changes in scope (not just the most recent edit)
    - Follow the commit message format from `CLAUDE.md` § Commit Messages
 
+4. **Ask if commit message should be written to a file**
+   - If yes, write to `ai-context/sessions/` (file name rules apply)
+   - If yes, and there is a brief related to the session, place a link to that brief. If unclear, ask the user. If instead of brief, there is a session document, place a link into that document to the commit message file
+   - If commit message is going to be written, use this format:
+
+     ```(triple quotes)
+     <commit message>
+     ```(triple quotes)
+
 ### Parameter Overrides
 
 Users can override the default scope detection:
@@ -60,6 +69,8 @@ The commit message must follow these specifications (from `CLAUDE.md` lines 81-9
    - Imperative verb (e.g., "Fix", "Add", "Refactor", "Update")
    - 50 characters soft limit
    - No period at the end
+   - Impreative form
+   - If JIRA/issue-tracker code is available, use it as prefix, e.g. `[FOO-123] The rest of the subject line...`
 
 2. **Body**:
    - Explain **what** changed and **why** (not how — the diff shows how)
@@ -135,16 +146,16 @@ When invoked:
 ```
 User: /commitmsg
 
-Claude:
+Agent:
 - Finds files changed since last commit
 - Discovers relevant session files from the past 2 days
 - Reads those sessions to understand full context
+- Identifies or asks about JIRA/issue-tracker code if available
 - Generates commit message covering all work
 
 Output:
-```
 
-Add user authentication with JWT tokens
+[FOO-123] Add user authentication with JWT tokens
 
 Implement JWT-based authentication to replace the previous
 session-based approach. This change improves security and enables
@@ -158,8 +169,6 @@ Changes include:
 - Added token refresh mechanism
 
 Signed-off-by: John Doe <john@example.com>
-
-```
 ```
 
 ### Example 2: Time override
@@ -167,9 +176,10 @@ Signed-off-by: John Doe <john@example.com>
 ```
 User: /commitmsg args: "since yesterday"
 
-Claude:
+Agent:
 - Filters session files to only those from yesterday onwards
 - Reads git diff for actual changes
+- Identifies or asks about JIRA/issue-tracker code if available
 - Generates commit message
 
 Output:
@@ -181,9 +191,10 @@ Output:
 ```
 User: /commitmsg args: "about authentication"
 
-Claude:
+Agent:
 - Scans all session files for "authentication" keyword
 - Reads matching sessions
+- Identifies or asks about JIRA/issue-tracker code if available
 - Generates commit message focused on auth changes
 
 Output:
@@ -196,6 +207,7 @@ Output:
 - If the generated message is too broad, use parameter overrides to narrow the scope
 - If the generated message is too narrow, check that relevant session files exist in `ai-context/sessions/`
 - The skill respects git's index — only uncommitted or staged changes are included
+- If no JIRA/issue-tracker code is found, the skill will ask for it
 
 ## References
 

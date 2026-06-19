@@ -641,6 +641,205 @@ class SetupScriptTests(unittest.TestCase):
         self.assertEqual(exit_code, 1, f"Expected exit 1, got {exit_code}")
         self.assertIn("Collision detected", stdout)
 
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 25: Fresh install creates root stubs pointing to ai-context/CLAUDE.md
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_25_fresh_root_stubs_single_source(self):
+        """Test that fresh install creates root stubs resolving to ai-context/CLAUDE.md."""
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        root = Path(self.test_dir)
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        claude_md = root / "CLAUDE.md"
+        self.assertTrue(claude_md.is_symlink(), "CLAUDE.md is not a symlink")
+        self.assertEqual(claude_md.resolve(), ai_context_claude)
+
+        agents_md = root / "AGENTS.md"
+        self.assertTrue(agents_md.is_symlink(), "AGENTS.md is not a symlink")
+        self.assertEqual(agents_md.resolve(), ai_context_claude)
+
+        windsurf_rules = root / ".windsurf" / "rules.md"
+        self.assertTrue(windsurf_rules.is_symlink(), ".windsurf/rules.md is not a symlink")
+        self.assertEqual(windsurf_rules.resolve(), ai_context_claude)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 26: Existing AGENTS.md creates AGENTS.override.md
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_26_existing_agents_creates_override(self):
+        """Test that existing AGENTS.md is preserved and AGENTS.override.md is created."""
+        root = Path(self.test_dir)
+        (root / "AGENTS.md").write_text("existing AGENTS content")
+
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        self.assertTrue((root / "AGENTS.md").exists(), "AGENTS.md should be preserved")
+        self.assertEqual((root / "AGENTS.md").read_text(), "existing AGENTS content")
+        self.assertTrue((root / "AGENTS.override.md").is_symlink(), "AGENTS.override.md not created")
+        self.assertEqual((root / "AGENTS.override.md").resolve(), ai_context_claude)
+
+        self.assertTrue((root / "CLAUDE.md").is_symlink(), "CLAUDE.md not created")
+        self.assertEqual((root / "CLAUDE.md").resolve(), ai_context_claude)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 27: Existing CLAUDE.md creates CLAUDE.local.md
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_27_existing_claude_creates_local(self):
+        """Test that existing CLAUDE.md is preserved and CLAUDE.local.md is created."""
+        root = Path(self.test_dir)
+        (root / "CLAUDE.md").write_text("existing CLAUDE content")
+
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        self.assertTrue((root / "CLAUDE.md").exists(), "CLAUDE.md should be preserved")
+        self.assertEqual((root / "CLAUDE.md").read_text(), "existing CLAUDE content")
+        self.assertTrue((root / "CLAUDE.local.md").is_symlink(), "CLAUDE.local.md not created")
+        self.assertEqual((root / "CLAUDE.local.md").resolve(), ai_context_claude)
+
+        self.assertTrue((root / "AGENTS.md").is_symlink(), "AGENTS.md not created")
+        self.assertEqual((root / "AGENTS.md").resolve(), ai_context_claude)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 28: Both existing AGENTS.md and CLAUDE.md create both overrides
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_28_existing_both_creates_both_overrides(self):
+        """Test that existing AGENTS.md and CLAUDE.md are preserved and both override symlinks are created."""
+        root = Path(self.test_dir)
+        (root / "AGENTS.md").write_text("existing AGENTS content")
+        (root / "CLAUDE.md").write_text("existing CLAUDE content")
+
+        exit_code, stdout, stderr = self.run_setup(None, "--auto")
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        self.assertEqual((root / "AGENTS.md").read_text(), "existing AGENTS content")
+        self.assertTrue((root / "AGENTS.override.md").is_symlink())
+        self.assertEqual((root / "AGENTS.override.md").resolve(), ai_context_claude)
+
+        self.assertEqual((root / "CLAUDE.md").read_text(), "existing CLAUDE content")
+        self.assertTrue((root / "CLAUDE.local.md").is_symlink())
+        self.assertEqual((root / "CLAUDE.local.md").resolve(), ai_context_claude)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 29: --root-stubs-skip leaves root files untouched
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_29_root_stubs_skip(self):
+        """Test that --root-stubs-skip does not create or modify root stubs."""
+        root = Path(self.test_dir)
+        (root / "AGENTS.md").write_text("existing AGENTS content")
+        (root / "CLAUDE.md").write_text("existing CLAUDE content")
+
+        exit_code, stdout, stderr = self.run_setup(None, "--root-stubs-skip", "--auto")
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        self.assertEqual((root / "AGENTS.md").read_text(), "existing AGENTS content")
+        self.assertEqual((root / "CLAUDE.md").read_text(), "existing CLAUDE content")
+        self.assertFalse((root / "AGENTS.override.md").exists())
+        self.assertFalse((root / "CLAUDE.local.md").exists())
+        self.assertFalse((root / "CLAUDE.md").is_symlink())
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 30: --root-stubs-overwrite replaces existing files
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_30_root_stubs_overwrite(self):
+        """Test that --root-stubs-overwrite replaces existing files with symlinks."""
+        root = Path(self.test_dir)
+        (root / "AGENTS.md").write_text("existing AGENTS content")
+        (root / "CLAUDE.md").write_text("existing CLAUDE content")
+
+        exit_code, stdout, stderr = self.run_setup(None, "--root-stubs-overwrite", "--auto")
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        self.assertTrue((root / "AGENTS.md").is_symlink())
+        self.assertEqual((root / "AGENTS.md").resolve(), ai_context_claude)
+        self.assertTrue((root / "CLAUDE.md").is_symlink())
+        self.assertEqual((root / "CLAUDE.md").resolve(), ai_context_claude)
+        self.assertFalse((root / "AGENTS.override.md").exists())
+        self.assertFalse((root / "CLAUDE.local.md").exists())
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 31: --root-stubs-backup backs up existing files and creates overrides
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_31_root_stubs_backup(self):
+        """Test that --root-stubs-backup backs up existing files and creates override symlinks."""
+        root = Path(self.test_dir)
+        (root / "AGENTS.md").write_text("existing AGENTS content")
+        (root / "CLAUDE.md").write_text("existing CLAUDE content")
+
+        exit_code, stdout, stderr = self.run_setup(None, "--root-stubs-backup", "--auto")
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        # Original files should be backed up, not present as regular files
+        self.assertFalse((root / "AGENTS.md").is_symlink() and (root / "CLAUDE.md").is_symlink())
+
+        self.assertTrue((root / "AGENTS.override.md").is_symlink())
+        self.assertEqual((root / "AGENTS.override.md").resolve(), ai_context_claude)
+        self.assertTrue((root / "CLAUDE.local.md").is_symlink())
+        self.assertEqual((root / "CLAUDE.local.md").resolve(), ai_context_claude)
+
+        # Backups should exist
+        backup_files = set(p.name for p in root.glob("*.20*"))
+        self.assertTrue(any("AGENTS.md" in name for name in backup_files), "AGENTS.md backup not found")
+        self.assertTrue(any("CLAUDE.md" in name for name in backup_files), "CLAUDE.md backup not found")
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 32: Conflicting --root-stubs-* flags
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_32_root_stubs_conflict_overwrite_skip(self):
+        """Test conflicting --root-stubs-overwrite and --root-stubs-skip returns exit code 2."""
+        exit_code, stdout, stderr = self.run_setup(
+            None,
+            "--root-stubs-overwrite",
+            "--root-stubs-skip",
+        )
+        self.assertEqual(exit_code, 2, f"Expected exit 2, got {exit_code}")
+        self.assertIn("not allowed with argument", stderr)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Test 33: --skills-skip does not affect --root-stubs-overwrite
+    # ──────────────────────────────────────────────────────────────────────
+
+    def test_33_skills_skip_root_stubs_overwrite(self):
+        """Test that --skills-skip does not prevent --root-stubs-overwrite from working."""
+        root = Path(self.test_dir)
+        (root / "AGENTS.md").write_text("existing AGENTS content")
+        (root / "CLAUDE.md").write_text("existing CLAUDE content")
+
+        exit_code, stdout, stderr = self.run_setup(
+            None,
+            "--skills-skip",
+            "--root-stubs-overwrite",
+            "--auto",
+        )
+        self.assertEqual(exit_code, 0, f"Expected exit 0, got {exit_code}")
+
+        ai_context_claude = (root / "ai-context" / "CLAUDE.md").resolve()
+
+        self.assertTrue((root / "AGENTS.md").is_symlink())
+        self.assertEqual((root / "AGENTS.md").resolve(), ai_context_claude)
+        self.assertTrue((root / "CLAUDE.md").is_symlink())
+        self.assertEqual((root / "CLAUDE.md").resolve(), ai_context_claude)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

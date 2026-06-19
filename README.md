@@ -19,15 +19,18 @@ python3 setup.py /path/to/your-project --java --tdd
 The script will:
 
 1. Create `ai-context/` with all core files and empty subdirectories
-2. Copy a `CLAUDE.md` stub to your project root (if none exists)
-3. Copy a `.windsurf/rules.md` stub (if none exists)
-4. Link skills as .md files under `.windsurf/workflows/` (Windsurf Cascade integration)
-5. Link skills as directories under `.claude/skills/` (Claude Code integration)
-6. Link skills as directories under `.opencode/skills/` (OpenCode integration)
-7. Link skills as directories under `.agents/skills/` (Codex integration)
-8. If `--java` is passed, install Java unit testing and test data guidelines
-9. Initialize darcs for local version control (if darcs is available)
-10. Offer to add `ai-context/` to `.gitignore`
+2. Create a `CLAUDE.md` symlink in your project root pointing to `ai-context/CLAUDE.md` (if none exists)
+3. Create an `AGENTS.md` symlink in your project root pointing to `ai-context/CLAUDE.md` (if none exists)
+4. If `CLAUDE.md` already exists, create `CLAUDE.local.md` as an override symlink pointing to `ai-context/CLAUDE.md`
+5. If `AGENTS.md` already exists, create `AGENTS.override.md` as an override symlink pointing to `ai-context/CLAUDE.md`
+6. Create a `.windsurf/rules.md` symlink pointing to `ai-context/CLAUDE.md` (if none exists)
+7. Link skills as .md files under `.windsurf/workflows/` (Windsurf Cascade integration)
+8. Link skills as directories under `.claude/skills/` (Claude Code integration)
+9. Link skills as directories under `.opencode/skills/` (OpenCode integration)
+10. Link skills as directories under `.agents/skills/` (Codex integration)
+11. If `--java` is passed, install Java unit testing and test data guidelines
+12. Initialize darcs for local version control (if darcs is available)
+13. Offer to add `ai-context/` to `.gitignore`
 
 ## What's Included
 
@@ -64,9 +67,12 @@ When installed, cross-references are automatically patched into `DEVELOPMENT_PRO
 
 ```
 your-project/
-├── CLAUDE.md                         # Stub → ai-context/CLAUDE.md
+├── CLAUDE.md                         # → ai-context/CLAUDE.md (created if missing)
+├── CLAUDE.local.md                   # → ai-context/CLAUDE.md (created if CLAUDE.md existed)
+├── AGENTS.md                         # → ai-context/CLAUDE.md (created if missing)
+├── AGENTS.override.md                # → ai-context/CLAUDE.md (created if AGENTS.md existed)
 ├── .windsurf/
-│   ├── rules.md                      # Stub → ai-context/CLAUDE.md
+│   ├── rules.md                      # → ai-context/CLAUDE.md
 │   └── workflows/
 │       ├── commitmsg.md              # → ai-context/skills/commitmsg/SKILL.md
 │       ├── prmsg.md                  # → ai-context/skills/prmsg/SKILL.md
@@ -116,6 +122,10 @@ your-project/
     ├── test-data/                     # Test data files
     └── archive/                       # Outdated files
 ```
+
+### Single Source of Truth
+
+All root-level agent guidance symlinks point to the same file: `ai-context/CLAUDE.md`. Editing `ai-context/CLAUDE.md` automatically updates the guidance seen by Windsurf, Claude Code, Codex, OpenCode, and any other tool that reads `CLAUDE.md`, `AGENTS.md`, `AGENTS.override.md`, `CLAUDE.local.md`, or `.windsurf/rules.md`.
 
 ## Documentation Hierarchy
 

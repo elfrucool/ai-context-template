@@ -173,6 +173,29 @@ EXIT CODES:
         help="Force prompt for collisions",
     )
 
+    # Root stubs behavior group (mutually exclusive)
+    root_stubs_group = parser.add_mutually_exclusive_group()
+    root_stubs_group.add_argument(
+        "--root-stubs-overwrite",
+        action="store_true",
+        help="Overwrite existing root stubs (AGENTS.md, CLAUDE.md) instead of creating override symlinks",
+    )
+    root_stubs_group.add_argument(
+        "--root-stubs-skip",
+        action="store_true",
+        help="Skip root stub installation entirely",
+    )
+    root_stubs_group.add_argument(
+        "--root-stubs-backup",
+        action="store_true",
+        help="Backup existing root stubs, then apply default behavior",
+    )
+    root_stubs_group.add_argument(
+        "--root-stubs-prompt",
+        action="store_true",
+        help="Prompt for root stub collisions",
+    )
+
     # Gitignore behavior group (mutually exclusive)
     gitignore_group = parser.add_mutually_exclusive_group()
     gitignore_group.add_argument(
@@ -281,6 +304,29 @@ def resolve_skills_behavior(args) -> str:
     else:
         # Default based on interactivity
         return "prompt" if INTERACTIVE else "skip"
+
+
+def resolve_root_stubs_behavior(args) -> str:
+    """Resolve root stub collision behavior based on flags.
+
+    Default is "auto" (create override symlinks when base files exist), which
+    differs from the defensive "skip" default used for skills.
+    """
+    if args.root_stubs_overwrite:
+        return "overwrite"
+    elif args.root_stubs_skip:
+        return "skip"
+    elif args.root_stubs_backup:
+        return "backup"
+    elif args.root_stubs_prompt:
+        return "prompt"
+    elif args.interactive:
+        return "prompt"
+    elif args.auto:
+        return "auto"
+    else:
+        # Default: create override symlinks (auto behavior)
+        return "auto"
 
 
 def resolve_gitignore_behavior(args) -> str:
@@ -461,27 +507,165 @@ def install_java_tdd_module(ai_context: pathlib.Path) -> None:
                 filepath.write_text(new_content)
 
 
-def _create_symlink_stub(path: pathlib.Path, rel_target: str, label: str) -> None:
-    """Create a symlink at path pointing to rel_target, skip if already present."""
-    if path.is_symlink():
-        print(f"Skipped {label} (symlink already exists)")
-    elif path.exists():
-        print(f"Skipped {label} (regular file already exists)")
+def _create_symlink(path: pathlib.Path, rel_target: str) -> None:
+    """Remove existing path if present and create a symlink pointing to rel_target."""
+    if path.exists() or path.is_symlink():
+        if path.is_symlink():
+            path.unlink()
+        elif path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.symlink_to(rel_target)
+
+
+def _symlink_points_to(path: pathlib.Path, rel_target: str) -> bool:
+    """Check if path is a symlink pointing to rel_target."""
+    try:
+        return path.is_symlink() and str(path.readlink()) == rel_target
+    except (OSError, ValueError):
+        return False
+
+
+def _install_root_stub(
+    path: pathlib.Path,
+    rel_target: str,
+    label: str,
+    behavior: str,
+    override_name: Optional[str] = None,
+) -> bool:
+    """Install a single root stub with collision handling.
+
+    Args:
+        path: Path to the base stub (e.g., target/AGENTS.md).
+        rel_target: Relative target for the symlink.
+        label: Human-readable label for messages.
+        behavior: Collision behavior ("overwrite", "skip", "backup", "prompt", "auto").
+        override_name: If provided, create this override file instead of overwriting
+            the base file when the base file already exists.
+
+    Returns:
+        True if the operation was skipped (partial success), False otherwise.
+    """
+    override_path = path.parent / override_name if override_name else None
+    base_exists = path.exists() or path.is_symlink()
+
+    if behavior == "skip":
+        if base_exists:
+            print(f"  Skipped {label} (existing file)")
+        else:
+            print(f"  Skipped {label} (missing file)")
+        return False
+
+    if behavior == "overwrite":
+        _create_symlink(path, rel_target)
+        print(f"  Overwrote {label}")
+        return False
+
+    if behavior == "backup":
+        if base_exists:
+            backup = create_backup(path, path)
+            print(f"  Backed up {label} to {backup.name}")
+        if override_path:
+            _create_symlink(override_path, rel_target)
+            print(f"  Created {override_name} (symlink → {rel_target})")
+        else:
+            _create_symlink(path, rel_target)
+            print(f"  Overwrote {label}")
+        return False
+
+    if behavior == "prompt":
+        if INTERACTIVE:
+            if override_path:
+                answer = (
+                    input(
+                        f"  {label} exists. Create {override_name} [o], skip [s], or over[w]rite? "
+                    )
+                    .strip()
+                    .lower()
+                )
+                if answer in ("o", "override"):
+                    _create_symlink(override_path, rel_target)
+                    print(f"  Created {override_name} (symlink → {rel_target})")
+                    return False
+                elif answer in ("w", "overwrite"):
+                    _create_symlink(path, rel_target)
+                    print(f"  Overwrote {label}")
+                    return False
+                else:
+                    print(f"  Skipped {label}")
+                    return True
+            else:
+                answer = input(f"  Overwrite {label}? [y/N] ").strip().lower()
+                if answer in ("y", "yes"):
+                    _create_symlink(path, rel_target)
+                    print(f"  Overwrote {label}")
+                    return False
+                else:
+                    print(f"  Skipped {label}")
+                    return True
+        else:
+            # Non-interactive prompt falls back to auto behavior
+            behavior = "auto"
+
+    # behavior == "auto" (default)
+    if base_exists:
+        if override_path:
+            if _symlink_points_to(path, rel_target):
+                print(f"  Skipped {label} (already symlink to {rel_target})")
+                return False
+            if _symlink_points_to(override_path, rel_target):
+                print(f"  Skipped {override_name} (already symlink to {rel_target})")
+                return False
+            _create_symlink(override_path, rel_target)
+            print(f"  Created {override_name} (symlink → {rel_target})")
+            return False
+        else:
+            # No override counterpart; behave like the original stub installer
+            if _symlink_points_to(path, rel_target):
+                print(f"  Skipped {label} (already symlink to {rel_target})")
+            else:
+                print(f"  Skipped {label} (existing file)")
+            return False
     else:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(rel_target)
-        print(f"Created {label} (symlink → {rel_target})")
+        _create_symlink(path, rel_target)
+        print(f"  Created {label} (symlink → {rel_target})")
+        return False
 
 
-def copy_root_stubs(target: pathlib.Path) -> None:
-    """Create symlinks at root level pointing to ai-context/CLAUDE.md."""
-    _create_symlink_stub(target / "CLAUDE.md", "ai-context/CLAUDE.md", "CLAUDE.md")
-    _create_symlink_stub(target / "AGENTS.md", "ai-context/CLAUDE.md", "AGENTS.md")
-    _create_symlink_stub(
+def install_root_stubs(target: pathlib.Path, root_stubs_behavior: str) -> bool:
+    """Install root stub symlinks with collision handling and override support.
+
+    Returns:
+        True if partial success (some operations were skipped), False otherwise.
+    """
+    print("Installing root stub symlinks...")
+    partial_success = False
+
+    partial_success |= _install_root_stub(
+        target / "CLAUDE.md",
+        "ai-context/CLAUDE.md",
+        "CLAUDE.md",
+        root_stubs_behavior,
+        override_name="CLAUDE.local.md",
+    )
+    partial_success |= _install_root_stub(
+        target / "AGENTS.md",
+        "ai-context/CLAUDE.md",
+        "AGENTS.md",
+        root_stubs_behavior,
+        override_name="AGENTS.override.md",
+    )
+    partial_success |= _install_root_stub(
         target / ".windsurf" / "rules.md",
         "../ai-context/CLAUDE.md",
         ".windsurf/rules.md",
+        root_stubs_behavior,
     )
+
+    print("  Root stub installation complete.")
+    return partial_success
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -489,28 +673,29 @@ def copy_root_stubs(target: pathlib.Path) -> None:
 # ──────────────────────────────────────────────────────────────────────
 
 
-def create_backup(source_dir: pathlib.Path, target_base: pathlib.Path) -> pathlib.Path:
-    """Create timestamped backup of source directory.
+def create_backup(source_path: pathlib.Path, target_base: pathlib.Path) -> pathlib.Path:
+    """Create timestamped backup of a file or directory.
 
     Returns:
-        Path to created backup directory.
+        Path to created backup.
     """
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_dir = target_base.parent / f"{target_base.name}.{timestamp}"
+    backup_path = target_base.parent / f"{target_base.name}.{timestamp}"
 
     counter = 1
-    while backup_dir.exists():
-        backup_dir = target_base.parent / f"{target_base.name}.{timestamp}-{counter}"
+    while backup_path.exists() or backup_path.is_symlink():
+        backup_path = target_base.parent / f"{target_base.name}.{timestamp}-{counter}"
         counter += 1
 
-    if source_dir.is_symlink():
-        # Copy what the symlink points to
-        shutil.copytree(source_dir.resolve(), backup_dir)
-    else:
-        # Copy directory recursively
-        shutil.copytree(source_dir, backup_dir)
+    # Resolve symlinks to copy the target content, not the link itself
+    source = source_path.resolve() if source_path.is_symlink() else source_path
 
-    return backup_dir
+    if source.is_dir():
+        shutil.copytree(source, backup_path)
+    else:
+        shutil.copy2(source, backup_path)
+
+    return backup_path
 
 
 def link_skills_to_claude(
@@ -1104,6 +1289,7 @@ def print_ai_agent_guidance_prompt() -> None:
     )
     print("- Configuration files - Environment and setup requirements")
     print("- `docs/` directory - Additional documentation")
+    print("- CLI tools available in PATH, e.g.: ag (silversearcher), rg (ripgrep), eza/exa (enhanced ls), fd (fdfind = improved find), sd (improved sed), dprint (for linting)")
     print("")
     print("**Analysis questions:**")
     print(
@@ -1112,6 +1298,11 @@ def print_ai_agent_guidance_prompt() -> None:
     print("- Who are the users? (developers, end users, internal team)")
     print("- What programming language(s) and frameworks are used?")
     print("- Are there any unusual architectural patterns or design decisions?")
+    print("- What are the CLI tools available in PATH?")
+    print("- What are the standard ways to lint code? and ai-context files?")
+    print("- `dprint` is special, when available it is good for linting `ai-context/` files,")
+    print("  but main repo files may be not good idea, so ask user if `dprint` is good for all")
+    print("  yaml/js/xml/markdown or only in `ai-context`")
     print("")
     print("### 2. Fill in `architecture/01-domain-explanation.md`:")
     print("")
@@ -1136,6 +1327,9 @@ def print_ai_agent_guidance_prompt() -> None:
     print("**Important - Symlink structure:** The root `CLAUDE.md`, `AGENTS.md`, and")
     print("`.windsurf/rules.md` are symbolic links pointing to `ai-context/CLAUDE.md`.")
     print("They are NOT separate files. Editing any of them modifies the same file.")
+    print("If the project already had `CLAUDE.md` or `AGENTS.md`, override symlinks")
+    print("(`CLAUDE.local.md` and `AGENTS.override.md`) were created alongside them;")
+    print("they also point to `ai-context/CLAUDE.md` and keep the originals intact.")
     print("Do NOT delete or erase these symlinks - they redirect agents to the")
     print("centralized context in `ai-context/CLAUDE.md`.")
     print("")
@@ -1190,6 +1384,8 @@ def print_summary(
     print(" Files:")
     print("   CLAUDE.md  → ai-context/CLAUDE.md      - Architecture principles (symlink)")
     print("   AGENTS.md  → ai-context/CLAUDE.md      - Architecture principles (symlink)")
+    print("   CLAUDE.local.md → ai-context/CLAUDE.md  - Override symlink (if CLAUDE.md existed)")
+    print("   AGENTS.override.md → ai-context/CLAUDE.md - Override symlink (if AGENTS.md existed)")
     print("   0-index.md                             - Directory guide")
     print("   architecture/00-architecture-index.md  - Architecture overview")
     print("   architecture/01-domain-explanation.md  - Domain concepts (fill in!)")
@@ -1290,6 +1486,7 @@ def main() -> None:
 
     # Resolve behaviors
     skills_behavior = resolve_skills_behavior(args)
+    root_stubs_behavior = resolve_root_stubs_behavior(args)
     darcs_behavior = resolve_darcs_behavior(args)
     tracking_behavior = resolve_tracking_behavior(args)
 
@@ -1304,11 +1501,11 @@ def main() -> None:
     if args.java:
         install_java_tdd_module(ai_context)
 
-    # Copy root stubs
-    copy_root_stubs(target)
+    # Install root stubs
+    partial_success = install_root_stubs(target, root_stubs_behavior)
 
     # Link skills to .claude directory
-    linked_count, skipped_count, collisions, partial_success = link_skills_to_claude(
+    linked_count, skipped_count, collisions, skills_partial = link_skills_to_claude(
         target,
         ai_context,
         skills_behavior,
@@ -1323,7 +1520,7 @@ def main() -> None:
     linked_count += wf_linked
     skipped_count += wf_skipped
     collisions.extend(wf_collisions)
-    partial_success = partial_success or wf_partial
+    partial_success = partial_success or skills_partial or wf_partial
 
     # Link skills to .agents directory (Codex)
     codex_linked, codex_skipped, codex_collisions, codex_partial = link_skills_to_codex(

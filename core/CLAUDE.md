@@ -88,7 +88,7 @@ When requested, commit messages should follow these guidelines:
 - Body should explain what and why
 - Body should be wrapped at 72 characters
 - Character length limits are soft, not hard
-- End with signature: Signed-off-by: <Your Name> <Your Email>
+- End with signature: Signed-off-by: <Your Name> <Your Email>, use git settings command to determine current user name and email (it may be local or global, check local first)
 - Most of the cases, I want to perform the commit myself making some small changes, so output in a way I can copy-paste the commit message
 - Ignore ai-context/ .vscode, .windsurf, and other similar directories unless specified
 
@@ -120,6 +120,11 @@ This project maintains detailed context in the `ai-context/` directory.
 
 ## Workflow Best Practices
 
+When need to know when and where you are, use OS commands, e.g.:
+
+- when: `date -I` or `date --iso-8601=seconds` or even `date --iso-8601=ns`
+- where: `pwd`
+
 When starting work or resuming a task:
 
 1. Check `ai-context/sessions/` for recent files (last 3-7 days)
@@ -136,6 +141,18 @@ When working with implementation plans:
 
 - Read the plan file before starting (if one exists in `ai-context/sessions/`)
 - Follow the plan as written - don't skip steps or deviate without asking
+
+When producing md files in `ai-context`
+
+- Ensure proper markdown format so UI readers render them properly, e.g.:
+
+    - Ensure tables are properly aligned
+    - Ensure line breaks before lists (either bullet or numeric) and after titles
+    - Ensure line breaks before sub lists
+    - Ensure line breaks before and after multiline code blocks
+    - Ensure line breaks between paragraphs
+    - If `dprint` tool is available, use it as `dprint fmt <filename1> <filename2> ...` (this one ensures the above formatting guidelines automatically)
+    - Remember that if a file was formatted with `dprint`, your memory of it may be outdated
 
 ## Your Task
 
